@@ -30,6 +30,14 @@ def main():
     global ips
     ips = db.ips_collection
 
+    # We're going to have a database of their historic storage usage
+    global storage
+    storage = db.storage_collection
+
+    # We're going to have a database of their current files
+    global files
+    files = db.files_collection
+
     # Remove everything so we're starting fresh
     people.delete_many({})
     ips.delete_many({})
