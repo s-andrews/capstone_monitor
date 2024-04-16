@@ -247,6 +247,15 @@ def connect_to_database(conf):
     global ips
     ips = db.ips_collection
 
+    # We're going to have a database of their historic storage usage
+    global storage
+    storage = db.storage_collection
+
+    # We're going to have a database of their current files
+    global files
+    files = db.files_collection
+
+
 
 # Read the main configuration
 server_conf = get_server_configuration()
