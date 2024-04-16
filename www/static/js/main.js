@@ -44,7 +44,7 @@ function show_login() {
 
     // Check to see if there's a valid session ID we can use
 
-    let session = Cookies.get("groupactivity_session_id")
+    let session = Cookies.get("capstone_session_id")
     if (session) {
         // Validate the ID
         $.ajax(
@@ -61,7 +61,7 @@ function show_login() {
                 },
                 error: function(message) {
                     console.log("Existing session didn't validate")
-                    Cookies.remove("groupactivity_session_id")
+                    Cookies.remove("capstone_session_id")
                     $("#logindiv").modal("show")
                     show_login()
                 }
@@ -74,7 +74,7 @@ function show_login() {
 }
 
 function logout() {
-    Cookies.remove("groupactivity_session_id")
+    Cookies.remove("capstone_session_id")
     $("#maincontent").hide()
 
     $("#logindiv").modal("show")
@@ -108,7 +108,7 @@ function process_login() {
             success: function(session_string) {
                 $("#loginerror").hide()
 
-                Cookies.set("groupactivity_session_id", session_string, { secure: false, sameSite: 'strict' })
+                Cookies.set("capstone_session_id", session_string, { secure: false, sameSite: 'strict' })
                 $("#login").text("Log In")
                 $("#login").prop("disabled",false)
                 $("#username").prop("disabled",false)

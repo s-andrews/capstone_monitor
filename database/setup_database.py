@@ -17,9 +17,9 @@ def main():
         conf['server']['address'],
         username = conf['server']['username'],
         password = conf['server']['password'],
-        authSource = "webbase_database"
+        authSource = "capstone_database"
     )
-    db = client.webbase_database
+    db = client.capstone_database
 
     # We have a collection for the users called "people"
     global people

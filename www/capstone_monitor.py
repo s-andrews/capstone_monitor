@@ -160,8 +160,8 @@ def get_form():
     # string from the cookie
     session = ""
 
-    if "groupactivity_session_id" in request.cookies:
-        session = request.cookies["groupactivity_session_id"]
+    if "capstone_session_id" in request.cookies:
+        session = request.cookies["capstone_session_id"]
 
     if request.method == "GET":
         form = request.args.to_dict(flat=True)
@@ -235,11 +235,11 @@ def connect_to_database(conf):
         conf['server']['address'],
         username = conf['server']['username'],
         password = conf['server']['password'],
-        authSource = "webbase_database"
+        authSource = "capstone_database"
     )
 
 
-    db = client.webbase_database
+    db = client.capstone_database
 
     global people
     people = db.people_collection

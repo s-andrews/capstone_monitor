@@ -1,10 +1,10 @@
 # Log in to mongosh as root
 
-use webbase_database
+use capstone_database
 db.createUser(
   {
     user: "webuser",
     pwd:  "apassword",
-    roles: [ { role: "readWrite", db: "webbase_database" }]
+    roles: [ { role: "readWrite", db: "capstone_database" }]
   }
 )
