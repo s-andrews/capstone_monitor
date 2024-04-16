@@ -44,8 +44,13 @@ def swap_uid_for_username(data):
     uid_keys = list(data.keys())
 
     for uid in uid_keys:
-        username = pwd.getpwuid(uid).pw_name
-        data[username] = data[uid]
+        # It's possible we have a uid which isn't in the password
+        # list
+        try:
+            username = pwd.getpwuid(uid).pw_name
+            data[username] = data[uid]
+        except:
+            print("Couldn't find UID",uid)
         del data[uid]
 
 def add_new_database_results(per_user_total_storage, per_user_files):
@@ -94,44 +99,54 @@ def clean_file_structure(per_user_files):
 def collect_file_stats(starting_point,per_user_total_storage, per_user_files):
     last_dir = starting_point
     for file in Path(starting_point).rglob("*"):
-        if file.is_dir():
-            if not str(file) == last_dir:
-                last_dir = str(file)
-                print("Parsing",last_dir)
+
+        # We've seen things go wrong here.  Mostly (I think) when files are 
+        # deleted between being itereated and being tested.  I'm going to wrap
+        # the whole thing in a try block and ignore errors
+
+        try:
+
+            if file.is_dir():
+                if not str(file) == last_dir:
+                    last_dir = str(file)
+                    print("Parsing",last_dir)
+                continue
+
+            if file.is_symlink():
+                continue
+
+            stats = file.stat()
+
+            # We're going to just deal with UIDs whilst we're iterating.  We'll convert 
+            # back to usernames after we're done
+
+            # Total storage usage
+            if not stats.st_uid in per_user_total_storage:
+                per_user_total_storage[stats.st_uid] = {}
+
+            if not starting_point in per_user_total_storage[stats.st_uid]:
+                per_user_total_storage[stats.st_uid][starting_point] = 0
+
+            per_user_total_storage[stats.st_uid][starting_point] += stats.st_size
+
+
+            # Per directory usage
+            parent = str(file.parent)
+            if not stats.st_uid in per_user_files:
+                per_user_files[stats.st_uid] = {}
+
+            if not parent in per_user_files[stats.st_uid]:
+                per_user_files[stats.st_uid][parent] = {"total": 0, "extensions": {}}
+
+            suffix = get_suffix(file.name)
+            if not suffix in per_user_files[stats.st_uid][parent]["extensions"]:
+                per_user_files[stats.st_uid][parent]["extensions"][suffix] = 0
+
+            per_user_files[stats.st_uid][parent]["extensions"][suffix] += stats.st_size
+            per_user_files[stats.st_uid][parent]["total"] += stats.st_size
+        
+        except:
             continue
-
-        if file.is_symlink():
-            continue
-
-        stats = file.stat()
-
-        # We're going to just deal with UIDs whilst we're iterating.  We'll convert 
-        # back to usernames after we're done
-
-        # Total storage usage
-        if not stats.st_uid in per_user_total_storage:
-            per_user_total_storage[stats.st_uid] = {}
-
-        if not starting_point in per_user_total_storage[stats.st_uid]:
-            per_user_total_storage[stats.st_uid][starting_point] = 0
-
-        per_user_total_storage[stats.st_uid][starting_point] += stats.st_size
-
-
-        # Per directory usage
-        parent = str(file.parent)
-        if not stats.st_uid in per_user_files:
-            per_user_files[stats.st_uid] = {}
-
-        if not parent in per_user_files[stats.st_uid]:
-            per_user_files[stats.st_uid][parent] = {"total": 0, "extensions": {}}
-
-        suffix = get_suffix(file.name)
-        if not suffix in per_user_files[stats.st_uid][parent]["extensions"]:
-            per_user_files[stats.st_uid][parent]["extensions"][suffix] = 0
-
-        per_user_files[stats.st_uid][parent]["extensions"][suffix] += stats.st_size
-        per_user_files[stats.st_uid][parent]["total"] += stats.st_size
 
 
 
