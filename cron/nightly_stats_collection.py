@@ -10,8 +10,8 @@ import pwd
 # get the overall, and per-user storage usage to update the main database
 
 def main():
-    starting_points = ["/bi/home","/bi/scratch","/bi/group"]
-    #starting_points = ["/bi/scratch/Genomes"]
+    #starting_points = ["/bi/home","/bi/scratch","/bi/group"]
+    starting_points = ["/bi/scratch/Genomes"]
 
     # Read the main configuration
     server_conf = get_server_configuration()
@@ -34,8 +34,8 @@ def main():
 
 
     # Now we switch out the uids for real usernames
-        swap_uid_for_username(per_user_total_storage)
-        swap_uid_for_username(per_user_files)
+    swap_uid_for_username(per_user_total_storage)
+    swap_uid_for_username(per_user_files)
 
     # Finally we want to add these results to the database
     add_new_database_results(per_user_total_storage, per_user_files)
