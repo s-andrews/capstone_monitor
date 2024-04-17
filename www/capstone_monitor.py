@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, render_template, make_response
+from flask import Flask, request, render_template, make_response, redirect, url_for
 import random
 from urllib.parse import quote_plus
 from pymongo import MongoClient
@@ -16,6 +16,37 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/storage")
+def storage():
+    person = validate_session()
+
+    if not person:
+        return redirect(url_for("index"))
+    
+    return render_template("storage.html")
+
+
+@app.route("/jobs")
+def jobs():
+    person = validate_session()
+
+    if not person:
+        return redirect(url_for("index"))
+    
+    return render_template("jobs.html")
+
+
+@app.route("/folders")
+def folders():
+    person = validate_session()
+
+    if not person:
+        return redirect(url_for("index"))
+    
+    return render_template("folders.html")
+
 
 @app.route("/login", methods = ['POST', 'GET'])
 def process_login():
@@ -143,6 +174,8 @@ def process_login():
 @app.route("/validate_session", methods = ['POST', 'GET'])
 def validate_session():
     form = get_form()
+    if not form["session"]:
+        return None
     person = checksession(form["session"])
     return(str(person["name"]))
 
