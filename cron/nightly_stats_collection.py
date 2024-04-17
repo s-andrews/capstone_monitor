@@ -10,8 +10,8 @@ import pwd
 # get the overall, and per-user storage usage to update the main database
 
 def main():
-    #starting_points = ["/bi/home","/bi/scratch","/bi/group"]
-    starting_points = ["/bi/scratch/Genomes"]
+    starting_points = ["/bi/home","/bi/scratch","/bi/group"]
+    #starting_points = ["/bi/scratch/Genomes"]
 
     # Read the main configuration
     server_conf = get_server_configuration()
@@ -97,7 +97,10 @@ def clean_file_structure(per_user_files):
                     continue
 
 def collect_file_stats(starting_point,per_user_total_storage, per_user_files):
-    last_dir = starting_point
+    print("Collecting stats from",starting_point)
+
+    files_seen = 0
+
     for file in Path(starting_point).rglob("*"):
 
         # We've seen things go wrong here.  Mostly (I think) when files are 
@@ -105,15 +108,15 @@ def collect_file_stats(starting_point,per_user_total_storage, per_user_files):
         # the whole thing in a try block and ignore errors
 
         try:
-
             if file.is_dir():
-                if not str(file) == last_dir:
-                    last_dir = str(file)
-                    print("Parsing",last_dir)
                 continue
 
             if file.is_symlink():
                 continue
+
+            files_seen += 1
+            if files_seen % 1000000 == 0:
+                print("Processed ",(files_seen/1000000),"million files")
 
             stats = file.stat()
 
