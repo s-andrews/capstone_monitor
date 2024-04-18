@@ -5,6 +5,30 @@
 
   <h2>Jobs</h2>
   
+  <p>This is your activity in the last month.</p>
+
+  <div class="row">
+  
+  <table class="table">
+  <tbody>
+    <tr>
+      <th>Total Jobs</th>
+      <td>{{ stats["jobs"] }}</th>
+    </tr>
+    <tr>
+      <th>Cluster Time</th>
+      <td>{{ stats["total_time"] }} hours</th>
+    </tr>
+    <tr>
+      <th>CPU Time</th>
+      <td>{{ stats["cpu_time"] }} hours</th>
+    </tr>
+
+  </tbody>
+</table>
+  
+  </div>
+
 
 </div>
 

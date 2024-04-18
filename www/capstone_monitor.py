@@ -9,6 +9,8 @@ from pathlib import Path
 import json
 import ldap
 import time
+import subprocess
+import datetime
 
 app = Flask(__name__)
 
@@ -49,8 +51,43 @@ def jobs():
         person = checksession(form["session"])
     except:
         return redirect(url_for("index"))
-            
-    return render_template("jobs.html")
+    
+
+    # Get the current users list of jobs for the last month
+    one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"--json"], stdout=subprocess.PIPE, encoding="utf8")
+
+    job_list = json.load(sacct.stdout)
+
+    job_summary = {
+        "jobs":0,
+        "total_time":0,
+        "cpu_time": 0,
+    }
+
+    for job in job_list["jobs"]:
+
+        # We can't make sacct report for only one person in json format.
+        if not job["account"] == person["username"]:
+            continue
+
+        cpus=1
+        mem=20
+        for tres in job["tres"]["requested"]:
+            if tres["type"] == "cpu":
+                cpus = int(tres["count"])
+            elif tres["type"] == "mem":
+                mem = int(tres["count"])
+
+
+        job_summary["jobs"] += 1
+        job_summary["total_time"] += int(job["time"]["elapsed"])
+        job_summary["cpu_time"] += int(job["time"]["elapsed"]) * (cpus*2)
+
+    job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
+    job_summary["cpu_time"] = int(job_summary["cpu_time"]/(60*60))
+
+    return render_template("jobs.html", stats = job_summary)
 
 
 @app.route("/folders")
