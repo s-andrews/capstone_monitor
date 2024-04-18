@@ -25,3 +25,6 @@ li.nav-item {
     padding-right: 1em;
 }
 
+tr.foldersize {
+    display: none;
+}

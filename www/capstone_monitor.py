@@ -30,23 +30,57 @@ def storage():
 
 @app.route("/jobs")
 def jobs():
-    person = validate_session()
-
-    if not person:
+    form = get_form()
+    if "session" not in form:
         return redirect(url_for("index"))
-    
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+            
     return render_template("jobs.html")
 
 
 @app.route("/folders")
 def folders():
-    person = validate_session()
-
-    if not person:
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
         return redirect(url_for("index"))
     
-    return render_template("folders.html")
+    user_files = files.find_one({"username":person["username"]})
 
+    user_files = user_files["folders"]
+
+    # Sort the data by size 
+    user_files = {k:v for k,v in sorted(user_files.items(), key=lambda i: i[1]["total"], reverse=True)}
+
+    # Change all of the sizes to something readable
+    for details in user_files.values():
+        details["total"] = make_readable_size(details["total"])
+        for extension in details["extensions"].keys():
+            details["extensions"][extension] = make_readable_size(details["extensions"][extension])
+    
+    return render_template("folders.html", data=user_files)
+
+
+def make_readable_size(bytes):
+    if bytes > (1024**4)/2:
+        return f"{bytes/(1024**4):.1f} TB"
+
+    if bytes > (1024**3)/2:
+        return f"{bytes/(1024**3):.1f} GB"
+
+    if bytes > (1024**2)/2:
+        return f"{bytes/(1024**2):.1f} MB"
+
+    if bytes > (1024**1)/2:
+        return f"{bytes/(1024**1):.1f} kB"
+
+    return f"{bytes} bytes"
 
 @app.route("/login", methods = ['POST', 'GET'])
 def process_login():

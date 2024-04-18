@@ -1,12 +1,56 @@
-{% extends "base.html" %}
-{% block title %}Example Web System{% endblock %}
+{% extends "index.html" %}
 {% block content %}
 
 <div class="container-fluid">
 
   <h2>Storage Folders</h2>
+
+  <div class="row">
+    <p>This is a list of all folders which contain more than 100MB of data. Removing unneeded data helps us to reduce both the cost and energy usage of our storage systems and keeps the cluster working optimally for everyone.  Please have a look and see if there's anything on this list which you can delete. Contact the bioinformatics group if you'd like help managing your data.</p>
+  </div>
+
+  <div class="row">
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>Folder</th>
+          <th>Size</th>
+          <th>Extensions</th>
+        </tr>
+        <tbody>
+          {% for foldername in data %}
+          <tr class="foldersize">
+            <td class="text-nowrap text-truncate" title="{{ foldername }}">{{ foldername }}</td>
+            <td class="text-nowrap">{{ data[foldername]["total"] }}</td>
+            <td class="text-nowrap">{% for extension in data[foldername]["extensions"] %} <strong>{{ extension }}</strong>({{ data[foldername]["extensions"][extension] }}){% endfor %}</strong></td>
+          </tr>
   
+          {% endfor %}
+  
+        </tbody>
+
+
+      </thead>
+
+    </table>
+
+    <nav aria-label="Folder Navigation">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" id="previous_folders" href="#">Previous</a></li>
+        <li class="page-item"><a class="page-link" id="next_folders" href="#">Next</a></li>
+      </ul>
+    </nav>
+
+  </div>
+
+
 
 </div>
 
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/folders.js') }}"></script>
 {% endblock %}
