@@ -20,12 +20,24 @@ def index():
 
 @app.route("/storage")
 def storage():
-    person = validate_session()
-
-    if not person:
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
         return redirect(url_for("index"))
     
-    return render_template("storage.html")
+    # Get the latest storage results
+    storage_data = storagec.find({}).sort({"date":-1}).limit(1).next()
+
+    this_user_data = storage_data["data"][person["username"]]
+
+    shares = list(this_user_data.keys())
+    sizes = list(this_user_data.values())
+    sizes = [int(x/(1024**3)) for x in sizes]
+
+    return render_template("storage.html", shares=str(shares), sizes=str(sizes))
 
 
 @app.route("/jobs")
@@ -315,8 +327,8 @@ def connect_to_database(conf):
     ips = db.ips_collection
 
     # We're going to have a database of their historic storage usage
-    global storage
-    storage = db.storage_collection
+    global storagec
+    storagec = db.storage_collection
 
     # We're going to have a database of their current files
     global files
