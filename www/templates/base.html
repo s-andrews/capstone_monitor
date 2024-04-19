@@ -21,6 +21,7 @@
     <title>{% block title %}Capstone Cluster{% endblock %}</title>
   </head>
   <body>
+
     <div id="maincontent" class="container">
         <nav class="navbar navbar-light bg-light navbar-expand-lg">
           <div class="container-fluid">
@@ -50,6 +51,8 @@
               </ul>
               </div>
           </div>
+          <img src="{{ url_for('static', filename='images/capstone_logo.svg') }}" width="200px">
+
         </nav>
         {% block content %}{% endblock %}
         <div id="footer" class="row">
