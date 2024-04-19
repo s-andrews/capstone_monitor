@@ -3,11 +3,22 @@
 
 <div class="container-fluid">
 
-  <h2>Storage Usage</h2>
+  <div class="row">
+    <h2 class="pb-5">Storage Usage for {{ person }}</h2>
+  </div>
   
   <div class="row">
+    <h4>Your current total storage usage is <strong>{{ totals["total_size"] }}GB</strong></h4>
+  </div>
 
-    <div style="width: 50%;">
+  <div class="row">
+    <h4>The lifetime cost to the institute for this amount of storage is <strong>&pound;{{ totals["lifetime_cost"] }}</strong></h4>
+  </div>
+
+
+  <div class="row">
+
+    <div style="width: 50%;" class="pt-5">
       <canvas id="storagechart"></canvas>
     </div>
 

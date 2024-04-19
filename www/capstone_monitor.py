@@ -97,7 +97,15 @@ def storage():
     sizes = list(this_user_data.values())
     sizes = [int(x/(1024**3)) for x in sizes]
 
-    return render_template("storage.html", shares=str(shares), sizes=str(sizes))
+    total_storage = {
+        "total_size": sum(sizes)
+    }
+    total_storage["lifetime_cost"] = f"{int(total_storage["total_size"]*1.32):,}"
+    total_storage["total_size"] = f"{total_storage["total_size"]:,}"
+
+
+
+    return render_template("storage.html", shares=str(shares), sizes=str(sizes), person=person["name"], totals=total_storage)
 
 
 @app.route("/jobs")
@@ -171,7 +179,7 @@ def folders():
         for extension in details["extensions"].keys():
             details["extensions"][extension] = make_readable_size(details["extensions"][extension])
     
-    return render_template("folders.html", data=user_files)
+    return render_template("folders.html", data=user_files, person=person["name"])
 
 
 def make_readable_size(bytes):
