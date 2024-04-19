@@ -1,19 +1,136 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container-fluid" class="text-center">
-
-  <h2>Cluster Status</h2>
   
-  <ul id="queue_hardware">
+  <div class="row">
+  
+    <div class="col-md-4">
+      <canvas id="storagechart", style="width:100%"></canvas>
+    </div>
 
-    <li><strong>Normal Queue:</strong> 128 Cores</li>
-    <li><strong>Interactive Queue:</strong> 32 Cores</li>
-  </ul>
+    <div class="col-md-4">
+      <canvas id="cpuchart" style="width:100%"></canvas>
+    </div>
 
+    <div class="col-md-4">
+      <canvas id="memchart" style="width:100%"></canvas>
+    </div>
+  </div>
 
 
 
 </div>
 
+{% endblock %}
+
+{% block js %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+const storagedata = {
+  labels : ["used","free"],
+  datasets : [
+    {
+      label: "",
+      data:[{{ node_data["used_storage"] }},{{ node_data["total_storage"] - node_data["used_storage"] }}],
+      backgroundColor: [
+        "#CC0000","#CCCCCC"
+      ]
+    }
+  ]
+};
+
+new Chart("storagechart", {
+  type: "doughnut",
+  data: storagedata,
+  options: {
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Storage Usage",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+
+const cpudata = {
+  labels : ["used_cores","free_cores"],
+  datasets : [
+    {
+      label: "",
+      data:[{{ node_data["used_cpus"] }},{{ node_data["total_cpus"] - node_data["used_cpus"] }}],
+      backgroundColor: [
+        "#CC0000","#CCCCCC"
+      ]
+    }
+  ]
+};
+
+new Chart("cpuchart", {
+  type: "doughnut",
+  data: cpudata,
+  options: {
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Node CPU Usage",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+const memdata = {
+  labels : ["used_memory_gb","free_memory_gb"],
+  datasets : [
+    {
+      label: "",
+      data:[{{ node_data["used_memory"] }},{{ node_data["total_memory"] - node_data["used_memory"] }}],
+      backgroundColor: [
+        "#CC0000","#CCCCCC"
+      ]
+    }
+  ]
+};
+
+new Chart("memchart", {
+  type: "doughnut",
+  data: memdata,
+  options: {
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Node Memory Usage",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+
+</script>
 
 {% endblock %}

@@ -17,7 +17,65 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    node_data = {
+        "total_storage": 0,
+        "used_storage": 0,
+        "total_cpus" : 0,
+        "used_cpus" : 0,
+        "total_memory" : 0,
+        "used_memory" : 0
+    }
+
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return render_template("index.html", node_data=node_data)
+
+    # We have a person.  Let's add some data
+
+    scontrol = subprocess.Popen(["scontrol","show","nodes"], stdout=subprocess.PIPE, encoding="utf8")
+
+    for line in scontrol.stdout:
+        line=line.strip()
+
+        if line.startswith("CPUAlloc"):
+            sections = line.split()
+            for section in sections:
+                subsections = section.split("=")
+                if subsections[0]=="CPUTot":
+                    node_data["total_cpus"] += int(subsections[1])
+                elif subsections[0]=="CPUAlloc":
+                    node_data["used_cpus"] += int(subsections[1])
+
+        if line.startswith("RealMemory"):
+            sections = line.split()
+            for section in sections:
+                subsections = section.split("=")
+                if subsections[0]=="RealMemory":
+                    node_data["total_memory"] += int(subsections[1])
+                elif subsections[0]=="AllocMem":
+                    node_data["used_memory"] += int(subsections[1])
+
+
+    df = subprocess.Popen(["df","-BT"], stdout=subprocess.PIPE, encoding="utf8")
+
+    for line in df.stdout:
+        line = line.strip()
+        if line.startswith("Private-Cluster.local:/ifs/homes"):
+            sections = line.split()
+            node_data["total_storage"] = int(sections[1][:-1])
+            node_data["used_storage"] = int(sections[2][:-1])
+
+
+    return render_template("index.html",node_data=node_data)
+
+
+
+
 
 
 @app.route("/storage")
