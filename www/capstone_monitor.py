@@ -121,9 +121,7 @@ def jobs():
 
     # Get the current users list of jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"--json"], stdout=subprocess.PIPE, encoding="utf8")
-
-    job_list = json.load(sacct.stdout)
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
@@ -131,29 +129,33 @@ def jobs():
         "cpu_time": 0,
     }
 
-    for job in job_list["jobs"]:
+    for line in sacct.stdout:
+        sections = line.strip().split()
 
-        # We can't make sacct report for only one person in json format.
-        if not job["account"] == person["username"]:
+        if not sections[0].isnumeric():
             continue
 
-        cpus=1
-        mem=20
-        for tres in job["tres"]["requested"]:
-            if tres["type"] == "cpu":
-                cpus = int(tres["count"])
-            elif tres["type"] == "mem":
-                mem = int(tres["count"])
-
-
         job_summary["jobs"] += 1
-        job_summary["total_time"] += int(job["time"]["elapsed"])
-        job_summary["cpu_time"] += int(job["time"]["elapsed"]) * (cpus*2)
+        job_summary["total_time"] += dhms_to_seconds(sections[-1])
+        job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
     job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
     job_summary["cpu_time"] = int(job_summary["cpu_time"]/(60*60))
 
     return render_template("jobs.html", stats = job_summary)
+
+
+def dhms_to_seconds (dhms):
+    d = 0
+    if "-" in dhms:
+        d,hms = dhms.split("-")
+        d=int(d)
+
+    else:
+        hms=dhms
+    h,m,s = hms.split(":")
+
+    return int(s) + (int(m)*60) + (int(h)*60*60) + (d*60*60*24)
 
 
 @app.route("/folders")
