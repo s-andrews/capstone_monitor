@@ -113,7 +113,7 @@ function process_login() {
                 $("#login").prop("disabled",false)
                 $("#username").prop("disabled",false)
                 $("#password").prop("disabled",false)
-                show_login()
+                location.reload()
             },
             error: function(message) {
                 $("#login").prop("disabled",false)
