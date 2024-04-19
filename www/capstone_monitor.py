@@ -100,8 +100,8 @@ def storage():
     total_storage = {
         "total_size": sum(sizes)
     }
-    total_storage["lifetime_cost"] = f"{int(total_storage["total_size"]*1.32):,}"
-    total_storage["total_size"] = f"{total_storage["total_size"]:,}"
+    total_storage["lifetime_cost"] = f"{int(total_storage['total_size']*1.32):,}"
+    total_storage["total_size"] = f"{int(total_storage['total_size']*1.32):,}"
 
 
 
