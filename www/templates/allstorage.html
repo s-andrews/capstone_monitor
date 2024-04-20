@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+
+  <div class="row">
+    <h2>Storage Usage for All Users</h2>
+  </div>
+  
+  <div class="row">
+
+    <div style="width: 100%;" class="pt-5">
+      <canvas id="storagechart" style="width: 100%; height: 20em;"></canvas>
+    </div>
+
+  </div>
+
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+const data = {
+  labels : {{ user_labels| safe }},
+  datasets : {{ user_data|safe }}
+};
+
+new Chart("storagechart", {
+  type: "bar",
+  data: data,
+  options: {
+    responsive: true,
+    devicePixelRatio: 4,
+    plugins: {
+    },
+    indexAxis: 'y',
+    scales : {
+      x: {
+        stacked: true,
+        title: {
+          display: true,
+          text: "Size (TB)"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      },
+      y: {
+        stacked: true,
+        ticks: {
+          autoSkip: false
+        }
+      }
+    }
+  }
+});
+</script>
+
+{% endblock %}

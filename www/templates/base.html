@@ -48,12 +48,17 @@
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('jobs') }}">MyJobs</a>
                 </li>
+                {% if isadmin %}
+                <li class="nav-item">
+                  <a class="admin-nav-link nav-link" href="{{ url_for('allstorage') }}">AllStorage</a>
+                </li>
+                {% endif %}
               </ul>
               </div>
           </div>
           <img src="{{ url_for('static', filename='images/capstone_logo.svg') }}" width="200px">
-
         </nav>
+        
         {% block content %}{% endblock %}
         <div id="footer" class="row">
           <div class="col-md-12">

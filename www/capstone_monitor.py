@@ -33,7 +33,7 @@ def index():
     try:
         person = checksession(form["session"])
     except:
-        return render_template("index.html", node_data=node_data)
+        return render_template("index.html", node_data=node_data, isadmin=False)
 
     # We have a person.  Let's add some data
 
@@ -71,11 +71,7 @@ def index():
             node_data["used_storage"] = int(sections[2][:-1])
 
 
-    return render_template("index.html",node_data=node_data)
-
-
-
-
+    return render_template("index.html",node_data=node_data, isadmin=is_admin(person))
 
 
 @app.route("/storage")
@@ -105,7 +101,53 @@ def storage():
 
 
 
-    return render_template("storage.html", shares=str(shares), sizes=str(sizes), person=person["name"], totals=total_storage)
+    return render_template("storage.html", shares=str(shares), sizes=str(sizes), person=person["name"], totals=total_storage, isadmin=is_admin(person))
+
+
+@app.route("/allstorage")
+def allstorage():
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+
+    # This is for admins only
+    if not is_admin(person):
+        return redirect(url_for("index"))
+
+    # Get the latest storage results
+    storage_data = storagec.find({}).sort({"date":-1}).limit(1).next()
+
+    # We want all of the users sorted by total usage
+    ordered_users = sorted(storage_data["data"].keys(), key=lambda x: sum([y for y in storage_data["data"][x].values()]), reverse=True)
+
+    # We'll take the top 30 users
+    ordered_users = ordered_users[:50]
+
+    # We now need the data 
+    datasets = []
+    for start_point in [("/bi/home","#1b9e77"),("/bi/group","#d96f02"),("/bi/scratch","#7570b3")]:
+        datasets.append({"label":start_point[0],"backgroundColor":start_point[1],"data":[]})
+        for user in ordered_users:
+            if start_point[0] in storage_data["data"][user]:
+                datasets[-1]["data"].append(round(storage_data["data"][user][start_point[0]]/(1024**4),1))
+            else:
+                datasets[-1]["data"].append(0)
+
+
+
+    return render_template("allstorage.html", user_labels=str(ordered_users), user_data=json.dumps(datasets) , isadmin=is_admin(person))
+
+
+def is_admin(person):
+
+    groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
+    _,groups = groups.stdout.split(":")
+    groups = groups.split()
+    return "bioinf" in groups  
 
 
 @app.route("/jobs")
@@ -142,7 +184,7 @@ def jobs():
     job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
     job_summary["cpu_time"] = int(job_summary["cpu_time"]/(60*60))
 
-    return render_template("jobs.html", stats = job_summary)
+    return render_template("jobs.html", stats = job_summary, isadmin=is_admin(person))
 
 
 def dhms_to_seconds (dhms):
@@ -181,7 +223,7 @@ def folders():
         for extension in details["extensions"].keys():
             details["extensions"][extension] = make_readable_size(details["extensions"][extension])
     
-    return render_template("folders.html", data=user_files, person=person["name"])
+    return render_template("folders.html", data=user_files, person=person["name"], isadmin=is_admin(person))
 
 
 def make_readable_size(bytes):
