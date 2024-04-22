@@ -6,7 +6,12 @@
   <div class="row">
     <h2 class="pb-5">Storage Usage for {{ person }}</h2>
   </div>
-  
+
+  <div class="row">
+    <p>This is an overall summary of your storage usage.  You can see a breakdown by folder in the <a href="{{ url_for('folders') }}">folders</a> page.</p>
+  </div>
+
+
   <div class="row">
     <h4>Your current total storage usage is <strong>{{ totals["total_size"] }}GB</strong></h4>
   </div>
