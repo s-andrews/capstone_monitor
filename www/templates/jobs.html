@@ -9,27 +9,138 @@
 
   <div class="row">
   
-  <table class="table">
-  <tbody>
-    <tr>
-      <th>Total Jobs</th>
-      <td>{{ stats["jobs"] }}</th>
-    </tr>
-    <tr>
-      <th>Cluster Time</th>
-      <td>{{ stats["total_time"] }} hours</th>
-    </tr>
-    <tr>
-      <th>CPU Time</th>
-      <td>{{ stats["cpu_time"] }} hours</th>
-    </tr>
-
-  </tbody>
-</table>
-  
+    <table class="table">
+      <tbody>
+        <tr>
+          <th>Total Jobs</th>
+          <td>{{ stats["jobs"] }}</td>
+        </tr>
+        <tr>
+          <th>Cluster Time</th>
+          <td>{{ stats["total_time"] }} hours</td>
+        </tr>
+        <tr>
+          <th>CPU Time</th>
+          <td>{{ stats["cpu_time"] }} hours</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
+  <div class="row">
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="jobchart"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="cpuchart"></canvas>
+      </div>
+    </div>
+  </div>
 
 </div>
 
+
 {% endblock %}
+
+{% block js %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+const jobdata = {
+  labels : {{ history_labels|safe }},
+  datasets : [
+    {
+      label: "",
+      data: {{ job_history|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("jobchart", {
+  type: "line",
+  data: jobdata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Job Numbers Last Month",
+        font: {
+          size: 20
+        }
+      }
+    },
+    scales : {
+      y: {
+        title: {
+          display: true,
+          text: "Number of jobs"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+const cpudata = {
+  labels : {{ history_labels|safe }},
+  datasets : [
+    {
+      label: "",
+      data: {{ cpu_history|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("cpuchart", {
+  type: "line",
+  data: cpudata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "CPU Hours Last Month",
+        font: {
+          size: 20
+        }
+      }
+    },
+    scales : {
+      y: {
+        title: {
+          display: true,
+          text: "CPU Hours"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+</script>
+
+{% endblock %}
+

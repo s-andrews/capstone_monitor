@@ -29,43 +29,42 @@
                 <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                  <button class="btn btn-danger" id="logout">Log Out</button>
-                </li>
-                <li class="nav-item">
-                  <h4 id="loginname">[Name] logged in</h4>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('storage') }}">MyStorage</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('folders') }}">MyFolders</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('jobs') }}">MyJobs</a>
-                </li>
-                {% if isadmin %}
-                <li class="nav-item">
-                  <a class="admin-nav-link nav-link" href="{{ url_for('allstorage') }}">AllStorage</a>
-                </li>
-                {% endif %}
-              </ul>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <button class="btn btn-danger" id="logout">Log Out</button>
+                  </li>
+                  <li class="nav-item">
+                    <h4 id="loginname">[Name] logged in</h4>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('storage') }}">MyStorage</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('folders') }}">MyFolders</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('jobs') }}">MyJobs</a>
+                  </li>
+                  {% if isadmin %}
+                  <li class="nav-item">
+                    <a class="admin-nav-link nav-link" href="{{ url_for('allstorage') }}">AllStorage</a>
+                  </li>
+                  {% endif %}
+                </ul>
               </div>
-          </div>
+            </div>
           <img src="{{ url_for('static', filename='images/capstone_logo.svg') }}" width="200px">
         </nav>
         
         {% block content %}{% endblock %}
         <div id="footer" class="row">
           <div class="col-md-12">
-            Please report any problems to our bug database</a>
+            Please report any problems to our bug database
           </div>
         </div>
-      
     </div>
 
     <!-- Login -->

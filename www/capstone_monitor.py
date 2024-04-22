@@ -163,13 +163,26 @@ def jobs():
 
     # Get the current users list of jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
         "total_time":0,
         "cpu_time": 0,
     }
+
+    
+    history_labels = []
+
+    job_history = []
+    cpu_history = []
+
+    for i in range(30):
+        history_labels.append(f"-{i}d")
+        job_history.append(0)
+        cpu_history.append(0)
+
+
 
     for line in sacct.stdout:
         sections = line.strip().split()
@@ -181,10 +194,21 @@ def jobs():
         job_summary["total_time"] += dhms_to_seconds(sections[-1])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
+        # Find the date to make the historical tally
+        print(line)
+        year,month,day = sections[-2].split("T")[0].split("-")
+        # Get how many days ago this was
+        days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
+        job_history[days_ago] += 1
+        cpu_history[days_ago] += dhms_to_seconds(sections[3])
+
+
     job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
     job_summary["cpu_time"] = int(job_summary["cpu_time"]/(60*60))
+    for i in range(len(cpu_history)):
+        cpu_history[i] = round(cpu_history[i]/(60*60),1)
 
-    return render_template("jobs.html", stats = job_summary, isadmin=is_admin(person))
+    return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), job_history=str(job_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
 
 
 def dhms_to_seconds (dhms):
