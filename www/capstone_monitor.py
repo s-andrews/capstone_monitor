@@ -195,7 +195,6 @@ def jobs():
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
         # Find the date to make the historical tally
-        print(line)
         year,month,day = sections[-2].split("T")[0].split("-")
         # Get how many days ago this was
         days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
@@ -210,6 +209,107 @@ def jobs():
 
     return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), job_history=str(job_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
 
+
+
+@app.route("/alljobs")
+def alljobs():
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+    
+
+    # This is for admins only
+    if not is_admin(person):
+        return redirect(url_for("index"))
+
+
+    # Get all jobs for the last month
+    one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
+    sacct = subprocess.Popen(["sacct","-a","-S",one_month_ago,"-o","jobid,jobname,alloccpus,cputime,reqmem,account,submit,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
+
+    job_summary = {
+        "jobs":0,
+        "total_time":0,
+        "cpu_time": 0,
+    }
+
+    user_summary = {
+
+    }
+
+    
+    history_labels = []
+
+    job_history = []
+    cpu_history = []
+
+    for i in range(30):
+        history_labels.append(f"-{i}d")
+        job_history.append(0)
+        cpu_history.append(0)
+
+
+
+    for line in sacct.stdout:
+        sections = line.strip().split()
+
+        if not sections[0].isnumeric():
+            continue
+        
+        username = sections[-3]
+        if not username in user_summary:
+            user_summary[username] = {"jobs":0, "cpu":0}
+
+        job_summary["jobs"] += 1
+        user_summary[username]["jobs"] += 1
+        job_summary["total_time"] += dhms_to_seconds(sections[-1])
+        job_summary["cpu_time"] += dhms_to_seconds(sections[3])
+        user_summary[username]["cpu"] += dhms_to_seconds(sections[3])
+
+        # Find the date to make the historical tally
+        year,month,day = sections[-2].split("T")[0].split("-")
+        # Get how many days ago this was
+        days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
+        job_history[days_ago] += 1
+        cpu_history[days_ago] += dhms_to_seconds(sections[3])
+
+
+    job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
+    job_summary["cpu_time"] = int(job_summary["cpu_time"]/(60*60))
+    for i in range(len(cpu_history)):
+        cpu_history[i] = round(cpu_history[i]/(60*60),1)
+
+
+    # Find the top users
+    job_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["jobs"], reverse=True)
+    user_job_numbers = []
+    for user in job_usernames:
+        user_job_numbers.append(user_summary[user]["jobs"])
+
+
+    cpu_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["cpu"], reverse=True)
+    user_cpu_hours = []
+    for user in cpu_usernames:
+        user_cpu_hours.append(round(user_summary[user]["cpu"]/(60*60),1))
+
+
+
+    return render_template(
+        "alljobs.html", 
+        stats = job_summary, 
+        history_labels=str(history_labels), 
+        job_history=str(job_history), 
+        cpu_history=str(cpu_history),
+        job_usernames=str(job_usernames),
+        user_job_numbers=str(user_job_numbers),
+        cpu_usernames=str(cpu_usernames),
+        user_cpu_hours=str(user_cpu_hours),
+        isadmin=is_admin(person)
+    )
 
 def dhms_to_seconds (dhms):
     d = 0

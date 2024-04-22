@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+
+  <h2>All Jobs</h2>
+  
+  <div class="row">
+  
+    <div class="col-md-4">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Total Jobs</th>
+            <td>{{ stats["jobs"] }}</td>
+          </tr>
+          <tr>
+            <th>Cluster Time</th>
+            <td>{{ stats["total_time"] }} hours</td>
+          </tr>
+          <tr>
+            <th>CPU Time</th>
+            <td>{{ stats["cpu_time"] }} hours</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-4">
+      <div style="width: 100%;">
+        <canvas id="userjobchart"></canvas>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div style="width: 100%;">
+        <canvas id="usercpuchart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="jobchart"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="cpuchart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+const jobdata = {
+  labels : {{ history_labels|safe }},
+  datasets : [
+    {
+      label: "",
+      data: {{ job_history|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("jobchart", {
+  type: "line",
+  data: jobdata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Job Numbers Last Month",
+        font: {
+          size: 20
+        }
+      }
+    },
+    scales : {
+      y: {
+        title: {
+          display: true,
+          text: "Number of jobs"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+const cpudata = {
+  labels : {{ history_labels|safe }},
+  datasets : [
+    {
+      label: "",
+      data: {{ cpu_history|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("cpuchart", {
+  type: "line",
+  data: cpudata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "CPU Hours Last Month",
+        font: {
+          size: 20
+        }
+      }
+    },
+    scales : {
+      y: {
+        title: {
+          display: true,
+          text: "CPU Hours"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+const user_job_numbers = {
+  labels : {{ job_usernames|safe }},
+  datasets : [
+    {
+      label: "",
+      data:{{ user_job_numbers|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("userjobchart", {
+  type: "bar",
+  data: user_job_numbers,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Highest User Jobs",
+        font: {
+          size: 20
+        }
+      }
+    },
+    indexAxis: 'y',
+    scales : {
+      x: {
+        title: {
+          display: true,
+          text: "Number of jobs"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+const user_cpu_hours = {
+  labels : {{ cpu_usernames|safe }},
+  datasets : [
+    {
+      label: "",
+      data:{{ user_cpu_hours|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("usercpuchart", {
+  type: "bar",
+  data: user_cpu_hours,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Highest User CPU Hours",
+        font: {
+          size: 20
+        }
+      }
+    },
+    indexAxis: 'y',
+    scales : {
+      x: {
+        title: {
+          display: true,
+          text: "CPU Hours"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
+
+
+</script>
+
+{% endblock %}
+
