@@ -1,3 +1,3 @@
 SHELL=/bin/bash
 LD_LIBRARY_PATH=/bi/apps/python/3.12.2/lib
-0 1 * * * root source /bi/home/andrewss/capstone_monitor/venv/bin/activate && /bi/home/andrewss/capstone_monitor/cron/nightly_stats_collection.py > /dev/null
+0 1 * * * source /bi/home/andrewss/capstone_monitor/venv/bin/activate && /bi/home/andrewss/capstone_monitor/cron/nightly_stats_collection.py > /dev/null
