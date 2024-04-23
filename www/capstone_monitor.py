@@ -207,6 +207,11 @@ def jobs():
     for i in range(len(cpu_history)):
         cpu_history[i] = round(cpu_history[i]/(60*60),1)
 
+    # Turn all of the timelines so newest is at the end.
+    history_labels = history_labels[::-1]
+    job_history = job_history[::-1]
+    cpu_history = cpu_history[::-1]
+
     return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), job_history=str(job_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
 
 
@@ -296,7 +301,10 @@ def alljobs():
     for user in cpu_usernames:
         user_cpu_hours.append(round(user_summary[user]["cpu"]/(60*60),1))
 
-
+    # Turn the history plots so newest is on the right
+    history_labels = history_labels[::-1]
+    job_history = job_history[::-1]
+    cpu_history = cpu_history[::-1]
 
     return render_template(
         "alljobs.html", 
