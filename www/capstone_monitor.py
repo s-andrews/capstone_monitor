@@ -237,7 +237,7 @@ def jobs():
     job_history = []
     cpu_history = []
 
-    for i in range(30):
+    for i in range(31):
         history_labels.append(f"-{i}d")
         job_history.append(0)
         cpu_history.append(0)
@@ -250,14 +250,21 @@ def jobs():
         if not sections[0].isnumeric():
             continue
 
-        job_summary["jobs"] += 1
-        job_summary["total_time"] += dhms_to_seconds(sections[-1])
-        job_summary["cpu_time"] += dhms_to_seconds(sections[3])
-
         # Find the date to make the historical tally
         year,month,day = sections[-2].split("T")[0].split("-")
         # Get how many days ago this was
         days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
+        # If a job was running for a long time we might see one which 
+        # is older than we allow.
+        if days_ago > 30:
+            continue
+
+
+        job_summary["jobs"] += 1
+        job_summary["total_time"] += dhms_to_seconds(sections[-1])
+        job_summary["cpu_time"] += dhms_to_seconds(sections[3])
+
+
         job_history[days_ago] += 1
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
 
@@ -312,7 +319,7 @@ def alljobs():
     job_history = []
     cpu_history = []
 
-    for i in range(30):
+    for i in range(31):
         history_labels.append(f"-{i}d")
         job_history.append(0)
         cpu_history.append(0)
@@ -329,16 +336,21 @@ def alljobs():
         if not username in user_summary:
             user_summary[username] = {"jobs":0, "cpu":0}
 
+        # Find the date to make the historical tally
+        year,month,day = sections[-2].split("T")[0].split("-")
+        # Get how many days ago this was
+        days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
+        if days_ago > 30:
+            continue
+
         job_summary["jobs"] += 1
         user_summary[username]["jobs"] += 1
         job_summary["total_time"] += dhms_to_seconds(sections[-1])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
         user_summary[username]["cpu"] += dhms_to_seconds(sections[3])
 
-        # Find the date to make the historical tally
-        year,month,day = sections[-2].split("T")[0].split("-")
-        # Get how many days ago this was
-        days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
+
+
         job_history[days_ago] += 1
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
 
