@@ -168,8 +168,38 @@ def allstorage():
                 datasets[-1]["data"].append(0)
 
 
+    # We want storage over time for everyone.
+    storage_cursor = storagec.find({}).sort({"date":-1}).limit(30)
 
-    return render_template("allstorage.html", user_labels=str(ordered_users), user_data=json.dumps(datasets) , isadmin=is_admin(person))
+    timelabels = []
+    timesizes = []
+
+    for datapoint in storage_cursor:        
+        timelabels.append(datapoint["date"])
+        size = 0
+        for user in datapoint["data"].keys():
+            for share in datapoint["data"][user].keys():
+                size += datapoint["data"][person["username"]][share]
+
+        timesizes.append(size)
+
+    timesizes = [round(x/(1024**4),1) for x in timesizes]
+    timelabels = [str(x).split()[0] for x in timelabels]
+
+    timesizes = timesizes[::-1]
+    timelabels = timelabels[::-1]
+
+
+
+    return render_template(
+        "allstorage.html", 
+        user_labels=str(ordered_users), 
+        user_data=json.dumps(datasets) , 
+        dates=str(timelabels),
+        sizestime=str(timesizes),
+
+        isadmin=is_admin(person)
+    )
 
 
 def is_admin(person):

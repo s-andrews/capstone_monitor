@@ -7,6 +7,14 @@
     <h2>Storage Usage for All Users</h2>
   </div>
   
+
+  <div class="row">
+    <div style="width: 100%;" class="pt-5">
+      <canvas id="storagetimechart"></canvas>
+    </div>
+  </div>
+
+
   <div class="row">
 
     <div style="width: 100%;" class="pt-5">
@@ -61,6 +69,51 @@ new Chart("storagechart", {
     }
   }
 });
+
+
+const timedata = {
+  labels : {{ dates|safe }},
+  datasets : [
+    {
+      label: "",
+      data:{{ sizestime|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("storagetimechart", {
+  type: "line",
+  data: timedata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Usage over the last month",
+        font: {
+          size: 20
+        }
+      }
+    },
+    scales : {
+      y: {
+        title: {
+          display: true,
+          text: "Size (TB)"
+        },
+        beginAtZero: true
+      }
+    },
+  }
+});
+
+
+
 </script>
 
 {% endblock %}
