@@ -85,13 +85,34 @@ def storage():
         return redirect(url_for("index"))
     
     # Get the latest storage results
-    storage_data = storagec.find({}).sort({"date":-1}).limit(1).next()
+    storage_cursor = storagec.find({}).sort({"date":-1}).limit(30)
+
+    timelabels = []
+    timesizes = []
+
+    for i,datapoint in enumerate(storage_cursor):
+        if i==0:
+            storage_data = datapoint
+        
+        timelabels.append(datapoint["date"])
+        size = 0
+        for share in datapoint["data"][person["username"]].keys():
+            size += datapoint["data"][person["username"]][share]
+
+        timesizes.append(size)
 
     this_user_data = storage_data["data"][person["username"]]
 
     shares = list(this_user_data.keys())
     sizes = list(this_user_data.values())
     sizes = [int(x/(1024**3)) for x in sizes]
+    timesizes = [int(x/(1024**3)) for x in timesizes]
+
+    timelabels = [str(x).split()[0] for x in timelabels]
+
+    timesizes = timesizes[::-1]
+    timelabels = timelabels[::-1]
+
 
     total_storage = {
         "total_size": sum(sizes)
@@ -101,7 +122,16 @@ def storage():
 
 
 
-    return render_template("storage.html", shares=str(shares), sizes=str(sizes), person=person["name"], totals=total_storage, isadmin=is_admin(person))
+    return render_template(
+        "storage.html", 
+        shares=str(shares), 
+        sizes=str(sizes), 
+        dates=str(timelabels),
+        sizestime=str(timesizes),
+        person=person["name"], 
+        totals=total_storage, 
+        isadmin=is_admin(person)
+    )
 
 
 @app.route("/allstorage")
