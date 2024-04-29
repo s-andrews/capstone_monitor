@@ -205,7 +205,6 @@ def allstorage():
 def is_admin(person):
 
     groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
-    print(groups.stdout)
     _,groups = groups.stdout.split(":")
     groups = groups.split()
     return "bioinf" in groups  
