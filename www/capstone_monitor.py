@@ -179,7 +179,7 @@ def allstorage():
         size = 0
         for user in datapoint["data"].keys():
             for share in datapoint["data"][user].keys():
-                size += datapoint["data"][person["username"]][share]
+                size += datapoint["data"][user][share]
 
         timesizes.append(size)
 
@@ -205,6 +205,7 @@ def allstorage():
 def is_admin(person):
 
     groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
+    print(groups.stdout)
     _,groups = groups.stdout.split(":")
     groups = groups.split()
     return "bioinf" in groups  
