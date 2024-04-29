@@ -1,4 +1,9 @@
 $( document ).ready(function() {
+
+    if (location.protocol !== 'https:') {
+        location.replace(`https:${location.href.substring(location.protocol.length)}`);
+    }
+
     show_login()
 
     // Action when they log in
