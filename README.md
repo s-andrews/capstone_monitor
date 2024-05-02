@@ -3,6 +3,8 @@ Capstone Monitoring System
 
 This repository provides the code for the monitoring system for the Babraham capstone cluster.  It provides a web interface from which users can look at their data usage, the current job queue and their job history.
 
+![Monitor Screenshot](../main/www/static/images/monitor_screenshot.png?raw=true)
+
 
 Setting up the system
 =====================
