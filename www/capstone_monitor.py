@@ -247,7 +247,10 @@ def jobs():
     for line in sacct.stdout:
         sections = line.strip().split()
 
-        if not sections[0].isnumeric():
+        # We test for the first field being numeric to get the main
+        # job entry. We remove underscores since array jobs will 
+        # include those too.
+        if not sections[0].replace("_","").isnumeric():
             continue
 
         # Find the date to make the historical tally
@@ -329,7 +332,9 @@ def alljobs():
     for line in sacct.stdout:
         sections = line.strip().split()
 
-        if not sections[0].isnumeric():
+        # We test for the first field being a number.  For array jobs
+        # there may be an underscore in there too.
+        if not sections[0].replace("_","").isnumeric():
             continue
         
         username = sections[-3]
