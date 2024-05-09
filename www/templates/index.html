@@ -21,6 +21,46 @@
     </div>
   </div>
 
+  <div class="row pt-5">
+    <h1 class="text-center">Current Jobs</h1>
+  </div>
+
+  <div class="row">
+
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Running Jobs</th>
+          <th>Queued Jobs</th>
+          <th>Used CPUs</th>
+          <th>Used Memory</th>
+          <th>Queued CPUs</th>
+          <th>Queued Memory</th>
+        </tr>
+        <tbody>
+          {% for user in userjobs %}
+          <tr>
+            <td class="text-nowrap">{{ user["username"] }}</td>
+            <td class="text-nowrap">{{ user["running_jobs"] }}</td>
+            <td class="text-nowrap">{{ user["queued_jobs"] }}</td>
+            <td class="text-nowrap">{{ user["used_cpus"] }}</td>
+            <td class="text-nowrap">{{ user["used_memory"] }}GB</td>
+            <td class="text-nowrap">{{ user["queued_cpus"] }}</td>
+            <td class="text-nowrap">{{ user["queued_memory"] }}GB</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+
+      </thead>
+
+    </table>
+
+
+  </div>
+
 
 
 </div>

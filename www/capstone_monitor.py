@@ -71,7 +71,36 @@ def index():
             node_data["used_storage"] = int(sections[2][:-1])
 
 
-    return render_template("index.html",node_data=node_data, isadmin=is_admin(person))
+    # We need the details of the current jobs in the queue
+    user_jobs = {}
+
+    with subprocess.Popen(["squeue", "-O", "username,minmemory,numcpus,nodelist"], stdout=subprocess.PIPE, encoding="utf8") as proc:
+        proc.stdout.readline()
+        for line in proc.stdout:
+            sections = line.strip().split()
+            username = sections[0]
+            running = sections[-1].startswith("compute")
+            memory = int(sections[1][:-1])
+            cpus = int(sections[2])
+
+            if not username in user_jobs:
+                user_jobs[username] = {"username":username,"running_jobs":0,"queued_jobs":0,"used_cpus":0,"queued_cpus":0,"used_memory":0,"queued_memory":0}
+
+            if running:
+                user_jobs[username]["running_jobs"] += 1
+                user_jobs[username]["used_cpus"] += cpus
+                user_jobs[username]["used_memory"] += memory
+            else:
+                user_jobs[username]["queued_jobs"] += 1
+                user_jobs[username]["queued_cpus"] += cpus
+                user_jobs[username]["queued_memory"] += memory
+
+
+    # Put the results in a list
+    job_data = list(user_jobs.values())
+    job_data.sort(key=lambda x: x["running_jobs"]+x["queued_jobs"], reverse=True)
+
+    return render_template("index.html",node_data=node_data, userjobs=job_data, isadmin=is_admin(person))
 
 
 @app.route("/storage")
