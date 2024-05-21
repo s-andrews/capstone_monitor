@@ -158,12 +158,12 @@ def get_suffix(filename):
     sections = filename.split(".")
     suffix = sections[-1]
 
-    if len(suffix) > 4:
+    if len(suffix) > 8:
         # This is too long for a real suffix
         return "None"
 
-    if suffix == "gz" and len(sections)>1 and len(sections[-2])<5:
-        suffix = ".".join(sections[-2:-1])
+    if suffix == "gz" and len(sections)>1 and len(sections[-2])<8:
+        suffix = ".".join(sections[-2:])
 
     return suffix
 
