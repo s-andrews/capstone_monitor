@@ -438,9 +438,13 @@ def dhms_to_seconds (dhms):
     return int(s) + (int(m)*60) + (int(h)*60*60) + (d*60*60*24)
 
 
-@app.route("/folders")
-def folders():
+@app.route("/folders", defaults={"username":None})
+@app.route("/folders/<username>")
+def folders(username):
     form = get_form()
+
+    username_list = []
+
     if "session" not in form:
         return redirect(url_for("index"))
     try:
@@ -448,7 +452,23 @@ def folders():
     except:
         return redirect(url_for("index"))
     
-    user_files = files.find_one({"username":person["username"]})
+    if username is None:
+        username = person["username"]
+    else:
+        # Specifying a username is something only an 
+        # admin is allowed to do
+        if not is_admin(person):
+            return redirect(url_for("index"))
+
+
+    if is_admin(person):
+        # We need to get a list of the usernames
+        username_results = files.find({},{"username":1})
+        for i in username_results:
+            username_list.append(i["username"])
+
+
+    user_files = files.find_one({"username":username})
 
     user_files = user_files["folders"]
 
@@ -461,7 +481,7 @@ def folders():
         for extension in details["extensions"].keys():
             details["extensions"][extension] = make_readable_size(details["extensions"][extension])
     
-    return render_template("folders.html", data=user_files, person=person["name"], isadmin=is_admin(person))
+    return render_template("folders.html", data=user_files, person=person["name"], shown_username=username, username_list=username_list,isadmin=is_admin(person))
 
 
 def make_readable_size(bytes):

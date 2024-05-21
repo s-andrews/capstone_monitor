@@ -26,7 +26,7 @@ $( document ).ready(function() {
 function button_pressed() {
     $.ajax(
         {
-            url: "get_user_data",
+            url: "/get_user_data",
             method: "POST",
             success: function(user_data) {
                 write_user_data(user_data)
@@ -54,7 +54,7 @@ function show_login() {
         // Validate the ID
         $.ajax(
             {
-                url: "validate_session",
+                url: "/validate_session",
                 method: "POST",
                 success: function(usersname) {
                     $("#logindiv").modal("hide")
@@ -104,7 +104,7 @@ function process_login() {
 
     $.ajax(
         {
-            url: "login",
+            url: "/login",
             method: "POST",
             data: {
                 username: username,

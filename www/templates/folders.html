@@ -9,6 +9,25 @@
     <p>This is a list of all folders which contain more than 100MB of data. Removing unneeded data helps us to reduce both the cost and energy usage of our storage systems and keeps the cluster working optimally for everyone.  Please have a look and see if there's anything on this list which you can delete. Contact the bioinformatics group if you'd like help managing your data.</p>
   </div>
 
+  {% if isadmin %}
+  <div class="row">  
+  <div class="col-md-4">
+  <select class="form-select" id="usertoview">
+  
+  {% for username in username_list %}
+  {% if username == shown_username %}
+  <option selected>{{ username }}</option>
+  {% else %}
+  <option>{{ username }}</option>
+  {% endif %}
+  {% endfor %}
+
+  </select>
+  </div>
+  </div>
+  {% endif %}
+
+
   <div class="row">
 
     <table class="table">
