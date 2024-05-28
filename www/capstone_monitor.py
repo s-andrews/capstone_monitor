@@ -103,15 +103,36 @@ def index():
     return render_template("index.html",node_data=node_data, userjobs=job_data, isadmin=is_admin(person))
 
 
-@app.route("/storage")
-def storage():
+@app.route("/storage", defaults={"username":None})
+@app.route("/storage/<username>")
+def storage(username):
+
     form = get_form()
+
+    username_list = []
+
     if "session" not in form:
         return redirect(url_for("index"))
     try:
         person = checksession(form["session"])
     except:
         return redirect(url_for("index"))
+    
+    if username is None:
+        username = person["username"]
+    else:
+        # Specifying a username is something only an 
+        # admin is allowed to do
+        if not is_admin(person):
+            return redirect(url_for("index"))
+
+
+    if is_admin(person):
+        # We need to get a list of the usernames
+        username_results = files.find({},{"username":1})
+        for i in username_results:
+            username_list.append(i["username"])
+
     
     # Get the latest storage results
     storage_cursor = storagec.find({}).sort({"date":-1}).limit(30)
@@ -125,12 +146,12 @@ def storage():
         
         timelabels.append(datapoint["date"])
         size = 0
-        for share in datapoint["data"][person["username"]].keys():
-            size += datapoint["data"][person["username"]][share]
+        for share in datapoint["data"][username].keys():
+            size += datapoint["data"][username][share]
 
         timesizes.append(size)
 
-    this_user_data = storage_data["data"][person["username"]]
+    this_user_data = storage_data["data"][username]
 
     shares = list(this_user_data.keys())
     sizes = list(this_user_data.values())
@@ -158,7 +179,9 @@ def storage():
         dates=str(timelabels),
         sizestime=str(timesizes),
         person=person["name"], 
-        totals=total_storage, 
+        totals=total_storage,
+        username_list = username_list, 
+        shown_username=username,
         isadmin=is_admin(person)
     )
 
