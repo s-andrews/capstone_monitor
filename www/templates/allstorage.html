@@ -6,13 +6,33 @@
   <div class="row">
     <h2>Storage Usage for All Users</h2>
   </div>
-  
 
   <div class="row">
     <div style="width: 100%;" class="pt-5">
       <canvas id="storagetimechart"></canvas>
     </div>
   </div>
+
+  <div class="row pt-5">  
+    <div class="col-md-2">
+    Compare with
+    </div>
+    <div class="col-md-4">
+    <select class="form-select" id="previousdates">
+      <option>None</option>
+
+      {% for date in previous_dates %}
+      {% if date == shown_date %}
+      <option selected>{{ date }}</option>
+      {% else %}
+      <option>{{ date }}</option>
+      {% endif %}
+      {% endfor %}
+    
+    </select>
+    </div>
+  </div>
+
 
 
   <div class="row">
@@ -30,6 +50,7 @@
 
 {% block js %}
 
+<script src="{{ url_for('static', filename='js/allstorage.js') }}"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

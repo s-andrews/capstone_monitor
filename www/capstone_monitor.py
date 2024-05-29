@@ -186,8 +186,11 @@ def storage(username):
     )
 
 
-@app.route("/allstorage")
-def allstorage():
+@app.route("/allstorage", defaults={"date":None})
+@app.route("/allstorage/<date>")
+def allstorage(date):
+    # This route either shows us the current absolute use, or the difference in usage
+    # between now and the specified date
     form = get_form()
     if "session" not in form:
         return redirect(url_for("index"))
@@ -203,21 +206,81 @@ def allstorage():
     # Get the latest storage results
     storage_data = storagec.find({}).sort({"date":-1}).limit(1).next()
 
-    # We want all of the users sorted by total usage
-    ordered_users = sorted(storage_data["data"].keys(), key=lambda x: sum([y for y in storage_data["data"][x].values()]), reverse=True)
+    # Get the dates for the last 50 results
+    previous_dates_results = storagec.find({},{"date":1}).sort({"date":-1}).limit(50)
+    previous_dates = []
 
-    # We'll take the top 30 users
-    ordered_users = ordered_users[:50]
+    for hit in previous_dates_results:
+        previous_dates.append(str(hit["date"]).split()[0])
+
+    # If we're comparing with a previous date then we need the data for that date.
+    if date is not None:
+        compare_storage_data = storagec.find({"date":{"$gte": datetime.datetime.strptime(date,"%Y-%m-%d")}}).sort({"date":1}).limit(1).next()
+
+
+    # We want all of the users sorted by total usage
+        
+    if date is None:
+        # If we're not comparing we just take the 30 biggest
+        ordered_users = sorted(storage_data["data"].keys(), key=lambda x: sum([y for y in storage_data["data"][x].values()]), reverse=True)
+
+        # We'll take the top 30 users
+        ordered_users = ordered_users[:50]
+
+    else:
+        # We need the 30 biggest changes
+        total_changes = []
+        for user in storage_data["data"].keys():
+            this_total = 0
+            for start_point in ["/bi/home","/bi/group","/bi/scratch"]:
+                current_size = 0
+                old_size = 0
+                if start_point in storage_data["data"][user]:
+                    current_size = storage_data["data"][user][start_point]
+                if start_point in compare_storage_data["data"][user]:
+                    old_size = compare_storage_data["data"][user][start_point]
+
+                    this_total += abs(current_size-old_size)
+
+            total_changes.append((user,this_total))
+
+        total_changes.sort(key=lambda x: x[1], reverse=True)
+
+        ordered_users = []
+
+        for i,data in enumerate(total_changes):
+            if i==30:
+                break
+
+            if data[1] < (1024**4)/10:
+                break
+
+            ordered_users.append(data[0])
 
     # We now need the data 
     datasets = []
     for start_point in [("/bi/home","#1b9e77"),("/bi/group","#d96f02"),("/bi/scratch","#7570b3")]:
         datasets.append({"label":start_point[0],"backgroundColor":start_point[1],"data":[]})
         for user in ordered_users:
-            if start_point[0] in storage_data["data"][user]:
-                datasets[-1]["data"].append(round(storage_data["data"][user][start_point[0]]/(1024**4),1))
+            # If we're not comparing then we just add their data
+            if date is None:
+                if start_point[0] in storage_data["data"][user]:
+                    datasets[-1]["data"].append(round(storage_data["data"][user][start_point[0]]/(1024**4),1))
+                else:
+                    datasets[-1]["data"].append(0)
             else:
-                datasets[-1]["data"].append(0)
+                # We're adding the difference between then and now
+                this_value = 0
+                if start_point[0] in storage_data["data"][user]:
+                    this_value = storage_data["data"][user][start_point[0]]/(1024**4)
+
+                last_value = 0
+                if start_point[0] in compare_storage_data["data"][user]:
+                    last_value = compare_storage_data["data"][user][start_point[0]]/(1024**4)
+
+                diff = round(this_value - last_value,1)
+                datasets[-1]["data"].append(diff)
+
 
 
     # We want storage over time for everyone.
@@ -249,7 +312,8 @@ def allstorage():
         user_data=json.dumps(datasets) , 
         dates=str(timelabels),
         sizestime=str(timesizes),
-
+        previous_dates=previous_dates[1:],
+        shown_date = date,
         isadmin=is_admin(person)
     )
 
