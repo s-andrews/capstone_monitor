@@ -324,7 +324,7 @@ def is_admin(person):
     groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
     _,groups = groups.stdout.split(":")
     groups = groups.split()
-    return "bioinf" in groups  
+    return "bioinf" in groups or "bics" in groups
 
 
 @app.route("/jobs")
