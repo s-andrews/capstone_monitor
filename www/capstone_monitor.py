@@ -224,11 +224,11 @@ def allstorage(date):
         # If we're not comparing we just take the 30 biggest
         ordered_users = sorted(storage_data["data"].keys(), key=lambda x: sum([y for y in storage_data["data"][x].values()]), reverse=True)
 
-        # We'll take the top 30 users
-        ordered_users = ordered_users[:50]
+        # We'll take the top 20 users
+        ordered_users = ordered_users[:20]
 
     else:
-        # We need the 30 biggest changes
+        # We need the 20 biggest changes
         total_changes = []
         for user in storage_data["data"].keys():
             this_total = 0
@@ -249,7 +249,7 @@ def allstorage(date):
         ordered_users = []
 
         for i,data in enumerate(total_changes):
-            if i==30:
+            if i==20:
                 break
 
             if data[1] < (1024**4)/10:
@@ -310,6 +310,7 @@ def allstorage(date):
         "allstorage.html", 
         user_labels=str(ordered_users), 
         user_data=json.dumps(datasets) , 
+        graph_height = int(len(ordered_users)/2)+2,
         dates=str(timelabels),
         sizestime=str(timesizes),
         previous_dates=previous_dates[1:],
