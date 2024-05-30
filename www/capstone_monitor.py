@@ -293,7 +293,7 @@ def allstorage(date):
                 old_size = 0
                 if start_point in storage_data["data"][user]:
                     current_size = storage_data["data"][user][start_point]
-                if start_point in compare_storage_data["data"][user]:
+                if user in compare_storage_data["data"] and start_point in compare_storage_data["data"][user]:
                     old_size = compare_storage_data["data"][user][start_point]
 
                     this_total += abs(current_size-old_size)
