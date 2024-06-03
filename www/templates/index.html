@@ -26,18 +26,31 @@
 
   <div class="row">
   
-    <div class="col-md-4">
+    <div class="col-md-6">
       <canvas id="storagechart", style="width:100%"></canvas>
     </div>
 
-    <div class="col-md-4">
-      <canvas id="cpuchart" style="width:100%"></canvas>
-    </div>
+    <div class="col-md-6">
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="cpuchart" style="width:100%"></canvas>
+        </div>
 
-    <div class="col-md-4">
-      <canvas id="memchart" style="width:100%"></canvas>
+        <div class="col-md-6">
+          <canvas id="memchart" style="width:100%"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="interactivecpuchart" style="width:100%"></canvas>
+        </div>
+
+        <div class="col-md-6">
+          <canvas id="interactivememchart" style="width:100%"></canvas>
+        </div>
+      </div>
+
     </div>
-  </div>
 
   <div class="row pt-5">
     <h1 class="text-center">Current Jobs</h1>
@@ -99,7 +112,7 @@ const storagedata = {
       label: "",
       data:[{{ node_data["used_storage"] }},{{ node_data["total_storage"] - node_data["used_storage"] }}],
       backgroundColor: [
-        "#CC0000","#CCCCCC"
+        "#00AAAA","#CCCCCC"
       ]
     }
   ]
@@ -152,7 +165,7 @@ new Chart("cpuchart", {
       },
       title: {
         display: true,
-        text: "Node CPU Usage",
+        text: "Batch CPU Usage",
         font: {
           size: 20
         }
@@ -160,6 +173,43 @@ new Chart("cpuchart", {
     }
   }
 });
+
+
+const interactivecpudata = {
+  labels : ["used_cores","free_cores"],
+  datasets : [
+    {
+      label: "",
+      data:[{{ node_data["interactive_used_cpus"] }},{{ node_data["interactive_total_cpus"] - node_data["interactive_used_cpus"] }}],
+      backgroundColor: [
+        "#0000CC","#CCCCCC"
+      ]
+    }
+  ]
+};
+
+new Chart("interactivecpuchart", {
+  type: "doughnut",
+  data: interactivecpudata,
+  options: {
+    devicePixelRatio: 4,
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Interactive CPU Usage",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+
 
 const memdata = {
   labels : ["used_memory_gb","free_memory_gb"],
@@ -186,7 +236,7 @@ new Chart("memchart", {
       },
       title: {
         display: true,
-        text: "Node Memory Usage",
+        text: "Batch Memory Usage",
         font: {
           size: 20
         }
@@ -194,6 +244,41 @@ new Chart("memchart", {
     }
   }
 });
+
+const interactivememdata = {
+  labels : ["used_memory_gb","free_memory_gb"],
+  datasets : [
+    {
+      label: "",
+      data:[{{ node_data["interactive_used_memory"] }},{{ node_data["interactive_total_memory"] - node_data["interactive_used_memory"] }}],
+      backgroundColor: [
+        "#0000CC","#CCCCCC"
+      ]
+    }
+  ]
+};
+
+new Chart("interactivememchart", {
+  type: "doughnut",
+  data: interactivememdata,
+  options: {
+    devicePixelRatio: 4,
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Interactive Memory Usage",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
 
 
 </script>

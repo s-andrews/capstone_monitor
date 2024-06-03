@@ -74,7 +74,11 @@ def index():
         "total_cpus" : 0,
         "used_cpus" : 0,
         "total_memory" : 0,
-        "used_memory" : 0
+        "used_memory" : 0,
+        "interactive_total_cpus" : 0,
+        "interactive_used_cpus" : 0,
+        "interactive_total_memory" : 0,
+        "interactive_used_memory" : 0
     }
 
     form = get_form()
@@ -89,26 +93,47 @@ def index():
 
     scontrol = subprocess.Popen(["scontrol","show","nodes"], stdout=subprocess.PIPE, encoding="utf8")
 
+    is_batch = True
+
     for line in scontrol.stdout:
         line=line.strip()
+
+        if "compute-1-" in line:
+            is_batch = False
+
+        if "compute-0-" in line:
+            is_batch = True
+
 
         if line.startswith("CPUAlloc"):
             sections = line.split()
             for section in sections:
                 subsections = section.split("=")
                 if subsections[0]=="CPUTot":
-                    node_data["total_cpus"] += int(subsections[1])
+                    if is_batch:
+                        node_data["total_cpus"] += int(subsections[1])
+                    else:
+                        node_data["interactive_total_cpus"] += int(subsections[1])
                 elif subsections[0]=="CPUAlloc":
-                    node_data["used_cpus"] += int(subsections[1])
+                    if is_batch:
+                        node_data["used_cpus"] += int(subsections[1])
+                    else:
+                        node_data["interactive_used_cpus"] += int(subsections[1])
 
         if line.startswith("RealMemory"):
             sections = line.split()
             for section in sections:
                 subsections = section.split("=")
                 if subsections[0]=="RealMemory":
-                    node_data["total_memory"] += int(subsections[1])
+                    if is_batch:
+                        node_data["total_memory"] += int(subsections[1])
+                    else:
+                        node_data["interactive_total_memory"] += int(subsections[1])
                 elif subsections[0]=="AllocMem":
-                    node_data["used_memory"] += int(subsections[1])
+                    if is_batch:
+                        node_data["used_memory"] += int(subsections[1])
+                    else:
+                        node_data["interactive_used_memory"] += int(subsections[1])
 
 
     df = subprocess.Popen(["df","-BT"], stdout=subprocess.PIPE, encoding="utf8")
@@ -124,14 +149,26 @@ def index():
     # We need the details of the current jobs in the queue
     user_jobs = {}
 
-    with subprocess.Popen(["squeue", "-r", "-O", "username,minmemory,numcpus,nodelist"], stdout=subprocess.PIPE, encoding="utf8") as proc:
+    with subprocess.Popen(["squeue", "-r", "-O", "jobid,username,minmemory,numcpus,nodelist"], stdout=subprocess.PIPE, encoding="utf8") as proc:
         proc.stdout.readline()
         for line in proc.stdout:
             sections = line.strip().split()
-            username = sections[0]
+            username = sections[1]
             running = sections[-1].startswith("compute")
-            memory = int(sections[1][:-1])
-            cpus = int(sections[2])
+            memory = int(sections[2][:-1])
+            cpus = int(sections[3])
+
+            # For pending jobs we might have an odd number of threads requested.  These will be rounded
+            # up when it actually runs.
+            if cpus % 2 != 0:
+                cpus += 1
+
+            # Annoyingly from the squeue output we can't tell the difference between
+            # memory per cpu or memory per node.  Most will be per node, but the only
+            # way to actually tell is to run scontrol
+            if is_memory_per_cpu(sections[0]):
+                memory *= cpus
+
 
             if not username in user_jobs:
                 user_jobs[username] = {"username":username,"running_jobs":0,"queued_jobs":0,"used_cpus":0,"queued_cpus":0,"used_memory":0,"queued_memory":0}
@@ -157,6 +194,15 @@ def index():
         alerts=alerts, 
         isadmin=is_admin(person)
     )
+
+
+def is_memory_per_cpu(jobid):
+    with subprocess.Popen(["scontrol","show","jobid","-d",str(jobid)], stdout=subprocess.PIPE, encoding="utf8") as scontrol_proc:
+        for line in scontrol_proc.stdout:
+            if "MinMemoryCPU=" in line:
+                return True
+            
+    return False
 
 
 @app.route("/storage", defaults={"username":None})
