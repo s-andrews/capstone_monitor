@@ -124,7 +124,7 @@ def index():
     # We need the details of the current jobs in the queue
     user_jobs = {}
 
-    with subprocess.Popen(["squeue", "-O", "username,minmemory,numcpus,nodelist"], stdout=subprocess.PIPE, encoding="utf8") as proc:
+    with subprocess.Popen(["squeue", "-r", "-O", "username,minmemory,numcpus,nodelist"], stdout=subprocess.PIPE, encoding="utf8") as proc:
         proc.stdout.readline()
         for line in proc.stdout:
             sections = line.strip().split()
