@@ -200,12 +200,13 @@ def storage(username):
         if i==0:
             storage_data = datapoint
         
-        timelabels.append(datapoint["date"])
-        size = 0
-        for share in datapoint["data"][username].keys():
-            size += datapoint["data"][username][share]
+        if username in datapoint["data"]:
+            size = 0
+            for share in datapoint["data"][username].keys():
+                size += datapoint["data"][username][share]
 
-        timesizes.append(size)
+            timelabels.append(datapoint["date"])
+            timesizes.append(size)
 
     this_user_data = storage_data["data"][username]
 
