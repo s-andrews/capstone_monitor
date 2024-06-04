@@ -3,8 +3,12 @@
 
 <div class="container-fluid">
 
+  <div class="row">
+    <h2>Storage Usage</h2>
+  </div>
+
   {% if isadmin %}
-  <div class="row pt-2 pb-2">  
+  <div class="row pt-2 pb-3">  
   <div class="col-md-4">
   <select class="form-select" id="usertoview">
   
@@ -20,12 +24,6 @@
   </div>
   </div>
   {% endif %}
-
-
-
-  <div class="row">
-    <h2 class="pb-5">Storage Usage for {{ person }}</h2>
-  </div>
 
   <div class="row">
     <p>This is an overall summary of your storage usage.  You can see a breakdown by folder in the <a href="{{ url_for('folders') }}">folders</a> page.</p>
