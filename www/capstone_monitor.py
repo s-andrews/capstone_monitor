@@ -504,7 +504,7 @@ def jobs():
         job_summary["total_time"] += dhms_to_seconds(sections[-2])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
-        memory = int(sections[4].strip()[:-1])
+        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60))
 
         mem_history[days_ago] += memory
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
@@ -542,10 +542,13 @@ def alljobs():
 
     # Get all jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-a","-S",one_month_ago,"-o","jobid,jobname,alloccpus,cputime,reqmem,account,submit,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-a","-S",one_month_ago,"-o","jobid,jobname,alloccpus,cputime,reqmem,account,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
+        "completed": 0,
+        "failed":0,
+        "cancelled":0,
         "total_time":0,
         "cpu_time": 0,
     }
@@ -557,12 +560,12 @@ def alljobs():
     
     history_labels = []
 
-    job_history = []
+    mem_history = []
     cpu_history = []
 
     for i in range(31):
         history_labels.append(f"-{i}d")
-        job_history.append(0)
+        mem_history.append(0)
         cpu_history.append(0)
 
 
@@ -575,26 +578,40 @@ def alljobs():
         if not sections[0].replace("_","").isnumeric():
             continue
         
-        username = sections[-3]
+        username = sections[-4]
         if not username in user_summary:
-            user_summary[username] = {"jobs":0, "cpu":0}
+            user_summary[username] = {"mem":0, "cpu":0}
 
         # Find the date to make the historical tally
-        year,month,day = sections[-2].split("T")[0].split("-")
+        year,month,day = sections[-3].split("T")[0].split("-")
         # Get how many days ago this was
         days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
         if days_ago > 30:
             continue
 
+        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60))
+
         job_summary["jobs"] += 1
-        user_summary[username]["jobs"] += 1
-        job_summary["total_time"] += dhms_to_seconds(sections[-1])
+
+        status = sections[-1].replace("+","")
+
+        if status=="COMPLETED":
+            job_summary["completed"] += 1
+        elif status=="FAILED":
+            job_summary["failed"] += 1
+        elif status=="CANCELLED":
+            job_summary["cancelled"] += 1
+        else:
+            print("Unknown status ",status)
+
+
+
+        job_summary["total_time"] += dhms_to_seconds(sections[-2])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
         user_summary[username]["cpu"] += dhms_to_seconds(sections[3])
 
 
-
-        job_history[days_ago] += 1
+        mem_history[days_ago] += memory
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
 
 
@@ -603,12 +620,15 @@ def alljobs():
     for i in range(len(cpu_history)):
         cpu_history[i] = round(cpu_history[i]/(60*60),1)
 
+    for i in range(len(mem_history)):
+        mem_history[i] = round(mem_history[i],1)
+
 
     # Find the top users
-    job_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["jobs"], reverse=True)
-    user_job_numbers = []
+    job_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["mem"], reverse=True)
+    user_mem_usage = []
     for user in job_usernames:
-        user_job_numbers.append(user_summary[user]["jobs"])
+        user_mem_usage.append(user_summary[user]["mem"])
 
 
     cpu_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["cpu"], reverse=True)
@@ -618,17 +638,17 @@ def alljobs():
 
     # Turn the history plots so newest is on the right
     history_labels = history_labels[::-1]
-    job_history = job_history[::-1]
+    mem_history = mem_history[::-1]
     cpu_history = cpu_history[::-1]
 
     return render_template(
         "alljobs.html", 
         stats = job_summary, 
         history_labels=str(history_labels), 
-        job_history=str(job_history), 
+        mem_history=str(mem_history), 
         cpu_history=str(cpu_history),
         job_usernames=str(job_usernames),
-        user_job_numbers=str(user_job_numbers),
+        user_mem_usage=str(user_mem_usage),
         cpu_usernames=str(cpu_usernames),
         user_cpu_hours=str(user_cpu_hours),
         isadmin=is_admin(person)

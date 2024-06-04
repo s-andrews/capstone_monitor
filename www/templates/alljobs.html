@@ -43,14 +43,15 @@
   <div class="row">
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="jobchart"></canvas>
+        <canvas id="cpuchart"></canvas>
       </div>
     </div>
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="cpuchart"></canvas>
+        <canvas id="memchart"></canvas>
       </div>
     </div>
+
   </div>
 
 </div>
@@ -65,21 +66,21 @@
 
 
 <script>
-const jobdata = {
+const memdata = {
   labels : {{ history_labels|safe }},
   datasets : [
     {
       label: "",
-      data: {{ job_history|safe }},
+      data: {{ mem_history|safe }},
       borderColor: "#000000",
       backgroundColor: "#CC0000"
     }
   ]
 };
 
-new Chart("jobchart", {
+new Chart("memchart", {
   type: "line",
-  data: jobdata,
+  data: memdata,
   options: {
     devicePixelRatio: 4,
     plugins: {
@@ -88,7 +89,7 @@ new Chart("jobchart", {
       },
       title: {
         display: true,
-        text: "Job Numbers Last Month",
+        text: "Memory Usage Last Month",
         font: {
           size: 20
         }
@@ -98,7 +99,7 @@ new Chart("jobchart", {
       y: {
         title: {
           display: true,
-          text: "Number of jobs"
+          text: "Memory GBH"
         },
         ticks: {
           beginAtZero: true
@@ -153,12 +154,12 @@ new Chart("cpuchart", {
 });
 
 
-const user_job_numbers = {
+const user_mem_usage = {
   labels : {{ job_usernames|safe }},
   datasets : [
     {
       label: "",
-      data:{{ user_job_numbers|safe }},
+      data:{{ user_mem_usage|safe }},
       borderColor: "#000000",
       backgroundColor: "#CC0000"
     }
@@ -167,7 +168,7 @@ const user_job_numbers = {
 
 new Chart("userjobchart", {
   type: "bar",
-  data: user_job_numbers,
+  data: user_mem_usage,
   options: {
     devicePixelRatio: 4,
     plugins: {
