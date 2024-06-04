@@ -443,10 +443,13 @@ def jobs():
 
     # Get the current users list of jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
+        "completed": 0,
+        "failed":0,
+        "cancelled":0,
         "total_time":0,
         "cpu_time": 0,
     }
@@ -454,12 +457,12 @@ def jobs():
     
     history_labels = []
 
-    job_history = []
+    mem_history = []
     cpu_history = []
 
     for i in range(31):
         history_labels.append(f"-{i}d")
-        job_history.append(0)
+        mem_history.append(0)
         cpu_history.append(0)
 
 
@@ -474,7 +477,7 @@ def jobs():
             continue
 
         # Find the date to make the historical tally
-        year,month,day = sections[-2].split("T")[0].split("-")
+        year,month,day = sections[-3].split("T")[0].split("-")
         # Get how many days ago this was
         days_ago = abs((datetime.datetime.today()-datetime.datetime(int(year),int(month),int(day))).days)
         # If a job was running for a long time we might see one which 
@@ -484,11 +487,26 @@ def jobs():
 
 
         job_summary["jobs"] += 1
-        job_summary["total_time"] += dhms_to_seconds(sections[-1])
+
+        status = sections[-1].replace("+","")
+
+        if status=="COMPLETED":
+            job_summary["completed"] += 1
+        elif status=="FAILED":
+            job_summary["failed"] += 1
+        elif status=="CANCELLED":
+            job_summary["cancelled"] += 1
+        else:
+            print("Unknown status ",status)
+
+
+
+        job_summary["total_time"] += dhms_to_seconds(sections[-2])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
+        memory = int(sections[4].strip()[:-1])
 
-        job_history[days_ago] += 1
+        mem_history[days_ago] += memory
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
 
 
@@ -499,10 +517,10 @@ def jobs():
 
     # Turn all of the timelines so newest is at the end.
     history_labels = history_labels[::-1]
-    job_history = job_history[::-1]
+    mem_history = mem_history[::-1]
     cpu_history = cpu_history[::-1]
 
-    return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), job_history=str(job_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
+    return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), mem_history=str(mem_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
 
 
 

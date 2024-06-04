@@ -3,41 +3,49 @@
 
 <div class="container-fluid">
 
-  <h2>Jobs</h2>
-  
-  <p>This is your activity in the last month.</p>
 
   <div class="row">
+    <div class="col-md-6">  
+      <h2>Jobs</h2>
   
-    <table class="table">
-      <tbody>
-        <tr>
-          <th>Total Jobs</th>
-          <td>{{ stats["jobs"] }}</td>
-        </tr>
-        <tr>
-          <th>Cluster Time</th>
-          <td>{{ stats["total_time"] }} hours</td>
-        </tr>
-        <tr>
-          <th>CPU Time</th>
-          <td>{{ stats["cpu_time"] }} hours</td>
-        </tr>
-      </tbody>
-    </table>
+      <p>This is your activity in the last month.</p>
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Total Jobs</th>
+            <td>{{ stats["jobs"] }} ({{ stats["completed"] }} Complete / {{ stats["failed"] }} Failed / {{ stats["cancelled"] }} Cancelled)</td>
+          </tr>
+          <tr>
+            <th>Cluster Time</th>
+            <td>{{ stats["total_time"] }} hours</td>
+          </tr>
+          <tr>
+            <th>CPU Time</th>
+            <td>{{ stats["cpu_time"] }} hours</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-2"></div>
+    <div class="col-md-4">
+      <div style="width: 100%;" class="pt-1">
+        <canvas id="jobchart"></canvas>
+      </div>
+    </div>
   </div>
 
   <div class="row">
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="jobchart"></canvas>
+        <canvas id="cpuchart"></canvas>
       </div>
     </div>
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="cpuchart"></canvas>
+        <canvas id="memchart"></canvas>
       </div>
     </div>
+
   </div>
 
 </div>
@@ -52,30 +60,69 @@
 
 
 <script>
+
 const jobdata = {
+  labels: [
+    'Completed',
+    'Failed',
+    'Cancelled'
+  ],
+  datasets: [{
+    label: 'Job Summary',
+    data: [{{ stats["completed"] }}, {{ stats["failed"] }}, {{ stats["cancelled"] }}],
+    backgroundColor: [
+      'rgb(0, 155, 0)',
+      'rgb(155, 0, 0)',
+      'rgb(0, 0, 155)'
+    ],
+    hoverOffset: 4
+  }]
+};
+
+new Chart("jobchart", {
+  type: "doughnut",
+  data: jobdata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: true
+      },
+      title: {
+        display: false,
+        text: "Job Summary Last Month",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+
+const memdata = {
   labels : {{ history_labels|safe }},
   datasets : [
     {
       label: "",
-      data: {{ job_history|safe }},
+      data: {{ mem_history|safe }},
       borderColor: "#000000",
       backgroundColor: "#CC0000"
     }
   ]
 };
 
-new Chart("jobchart", {
+new Chart("memchart", {
   type: "line",
-  data: jobdata,
+  data: memdata,
   options: {
-    devicePixelRatio: 4,
     plugins: {
       legend: {
         display: false
       },
       title: {
         display: true,
-        text: "Job Numbers Last Month",
+        text: "Job Memory Usage Last Month",
         font: {
           size: 20
         }
@@ -85,7 +132,7 @@ new Chart("jobchart", {
       y: {
         title: {
           display: true,
-          text: "Number of jobs"
+          text: "Memory GBH"
         },
         ticks: {
           beginAtZero: true
