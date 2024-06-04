@@ -430,9 +430,15 @@ def is_admin(person):
     return "bioinf" in groups or "bics" in groups
 
 
-@app.route("/jobs")
-def jobs():
+
+@app.route("/jobs", defaults={"username":None})
+@app.route("/jobs/<username>")
+
+def jobs(username):
     form = get_form()
+
+    username_list = []
+
     if "session" not in form:
         return redirect(url_for("index"))
     try:
@@ -441,9 +447,26 @@ def jobs():
         return redirect(url_for("index"))
     
 
+    if username is None:
+        username = person["username"]
+    else:
+        # Specifying a username is something only an 
+        # admin is allowed to do
+        if not is_admin(person):
+            return redirect(url_for("index"))
+
+
+    if is_admin(person):
+        # We need to get a list of the usernames
+        username_results = files.find({},{"username":1})
+        for i in username_results:
+            username_list.append(i["username"])
+
+    
+
     # Get the current users list of jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",person["username"],"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",username,"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
@@ -520,7 +543,15 @@ def jobs():
     mem_history = mem_history[::-1]
     cpu_history = cpu_history[::-1]
 
-    return render_template("jobs.html", stats = job_summary, history_labels=str(history_labels), mem_history=str(mem_history), cpu_history=str(cpu_history),isadmin=is_admin(person))
+    return render_template(
+        "jobs.html", 
+        stats = job_summary, 
+        history_labels=str(history_labels), 
+        mem_history=str(mem_history), 
+        cpu_history=str(cpu_history),
+        username_list=username_list,
+        shown_username=username,
+        isadmin=is_admin(person))
 
 
 
