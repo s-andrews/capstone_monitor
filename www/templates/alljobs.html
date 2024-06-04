@@ -7,12 +7,12 @@
   
   <div class="row">
   
-    <div class="col-md-4">
+    <div class="col-md-6">
       <table class="table">
         <tbody>
           <tr>
             <th>Total Jobs</th>
-            <td>{{ stats["jobs"] }}</td>
+            <td>{{ stats["jobs"] }} ({{ stats["completed"] }} Complete / {{ stats["failed"] }} Failed / {{ stats["cancelled"] }} Cancelled)</td>
           </tr>
           <tr>
             <th>Cluster Time</th>
@@ -25,16 +25,31 @@
         </tbody>
       </table>
     </div>
+    <div class="col-md-2"></div>
+    <div class="col-md-4">
+      <div style="width: 100%;" class="pt-1">
+        <canvas id="jobchart"></canvas>
+      </div>
+    </div>
 
+  </div>
+
+  <div class="row">
     <div class="col-md-4">
       <div style="width: 100%;">
-        <canvas id="userjobchart"></canvas>
+        <canvas id="usercpuchart"></canvas>
       </div>
     </div>
 
     <div class="col-md-4">
       <div style="width: 100%;">
-        <canvas id="usercpuchart"></canvas>
+        <canvas id="usermemchart"></canvas>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div style="width: 100%;">
+        <canvas id="userfailchart"></canvas>
       </div>
     </div>
 
@@ -66,6 +81,48 @@
 
 
 <script>
+
+
+const jobdata = {
+  labels: [
+    'Completed',
+    'Failed',
+    'Cancelled'
+  ],
+  datasets: [{
+    label: 'Job Summary',
+    data: [{{ stats["completed"] }}, {{ stats["failed"] }}, {{ stats["cancelled"] }}],
+    backgroundColor: [
+      'rgb(0, 155, 0)',
+      'rgb(155, 0, 0)',
+      'rgb(0, 0, 155)'
+    ],
+    hoverOffset: 4
+  }]
+};
+
+new Chart("jobchart", {
+  type: "doughnut",
+  data: jobdata,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: true
+      },
+      title: {
+        display: false,
+        text: "Job Summary Last Month",
+        font: {
+          size: 20
+        }
+      }
+    }
+  }
+});
+
+
+
 const memdata = {
   labels : {{ history_labels|safe }},
   datasets : [
@@ -155,7 +212,7 @@ new Chart("cpuchart", {
 
 
 const user_mem_usage = {
-  labels : {{ job_usernames|safe }},
+  labels : {{ mem_usernames|safe }},
   datasets : [
     {
       label: "",
@@ -166,7 +223,7 @@ const user_mem_usage = {
   ]
 };
 
-new Chart("userjobchart", {
+new Chart("usermemchart", {
   type: "bar",
   data: user_mem_usage,
   options: {
@@ -177,7 +234,7 @@ new Chart("userjobchart", {
       },
       title: {
         display: true,
-        text: "Highest User Jobs",
+        text: "Highest User Memory",
         font: {
           size: 20
         }
@@ -188,7 +245,7 @@ new Chart("userjobchart", {
       x: {
         title: {
           display: true,
-          text: "Number of jobs"
+          text: "Memory GBH"
         },
         ticks: {
           beginAtZero: true
@@ -197,6 +254,52 @@ new Chart("userjobchart", {
     }
   }
 });
+
+
+const user_fail_usage = {
+  labels : {{ fail_usernames|safe }},
+  datasets : [
+    {
+      label: "",
+      data:{{ user_fail_usage|safe }},
+      borderColor: "#000000",
+      backgroundColor: "#CC0000"
+    }
+  ]
+};
+
+new Chart("userfailchart", {
+  type: "bar",
+  data: user_fail_usage,
+  options: {
+    devicePixelRatio: 4,
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: "Highest User Failed Jobs",
+        font: {
+          size: 20
+        }
+      }
+    },
+    indexAxis: 'y',
+    scales : {
+      x: {
+        title: {
+          display: true,
+          text: "Failed Jobs"
+        },
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+});
+
 
 
 const user_cpu_hours = {

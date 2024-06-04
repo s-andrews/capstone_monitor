@@ -580,7 +580,7 @@ def alljobs():
         
         username = sections[-4]
         if not username in user_summary:
-            user_summary[username] = {"mem":0, "cpu":0}
+            user_summary[username] = {"mem":0, "cpu":0, "fails":0}
 
         # Find the date to make the historical tally
         year,month,day = sections[-3].split("T")[0].split("-")
@@ -599,6 +599,7 @@ def alljobs():
             job_summary["completed"] += 1
         elif status=="FAILED":
             job_summary["failed"] += 1
+            user_summary[username]["fails"] += 1
         elif status=="CANCELLED":
             job_summary["cancelled"] += 1
         else:
@@ -613,6 +614,7 @@ def alljobs():
 
         mem_history[days_ago] += memory
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
+        user_summary[username]["mem"] += memory
 
 
     job_summary["total_time"] = int(job_summary["total_time"]/(60*60))
@@ -625,9 +627,9 @@ def alljobs():
 
 
     # Find the top users
-    job_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["mem"], reverse=True)
+    mem_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["mem"], reverse=True)
     user_mem_usage = []
-    for user in job_usernames:
+    for user in mem_usernames:
         user_mem_usage.append(user_summary[user]["mem"])
 
 
@@ -635,6 +637,15 @@ def alljobs():
     user_cpu_hours = []
     for user in cpu_usernames:
         user_cpu_hours.append(round(user_summary[user]["cpu"]/(60*60),1))
+
+
+    fail_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["fails"], reverse=True)
+    user_fail_usage = []
+    for user in fail_usernames:
+        if user_summary[user]["fails"] == 0:
+            break
+        user_fail_usage.append(user_summary[user]["fails"])
+
 
     # Turn the history plots so newest is on the right
     history_labels = history_labels[::-1]
@@ -647,10 +658,12 @@ def alljobs():
         history_labels=str(history_labels), 
         mem_history=str(mem_history), 
         cpu_history=str(cpu_history),
-        job_usernames=str(job_usernames),
-        user_mem_usage=str(user_mem_usage),
         cpu_usernames=str(cpu_usernames),
+        mem_usernames=str(mem_usernames),
+        fail_usernames=str(fail_usernames),
+        user_mem_usage=str(user_mem_usage),
         user_cpu_hours=str(user_cpu_hours),
+        user_fail_usage=str(user_fail_usage),
         isadmin=is_admin(person)
     )
 
