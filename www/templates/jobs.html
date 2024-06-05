@@ -44,7 +44,7 @@
     <div class="col-md-2"></div>
     <div class="col-md-4">
       <div style="width: 100%;" class="pt-1">
-        <canvas id="jobchart"></canvas>
+        <canvas id="jobchart" style="width: 100%;"></canvas>
       </div>
     </div>
   </div>
@@ -52,12 +52,12 @@
   <div class="row">
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="cpuchart"></canvas>
+        <canvas id="cpuchart" style="width: 100%;"></canvas>
       </div>
     </div>
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="memchart"></canvas>
+        <canvas id="memchart" style="width: 100%;"></canvas>
       </div>
     </div>
 
@@ -101,6 +101,7 @@ new Chart("jobchart", {
   data: jobdata,
   options: {
     devicePixelRatio: 4,
+    responsive: false,
     plugins: {
       legend: {
         display: true
@@ -133,6 +134,8 @@ new Chart("memchart", {
   type: "line",
   data: memdata,
   options: {
+    devicePixelRatio: 4,
+    responsive: false,
     plugins: {
       legend: {
         display: false
@@ -141,19 +144,29 @@ new Chart("memchart", {
         display: true,
         text: "Job Memory Usage Last Month",
         font: {
-          size: 20
+          size: 10
         }
       }
     },
     scales : {
+      x: {
+        ticks: {
+          font: {
+            size: 8
+          }
+        }
+      },
       y: {
         title: {
           display: true,
           text: "Memory GBH"
         },
         ticks: {
-          beginAtZero: true
-        }
+          beginAtZero: true,
+          font: {
+            size: 8
+          }
+        },
       }
     }
   }
@@ -176,6 +189,7 @@ new Chart("cpuchart", {
   type: "line",
   data: cpudata,
   options: {
+    responsive: false,
     devicePixelRatio: 4,
     plugins: {
       legend: {
@@ -185,18 +199,30 @@ new Chart("cpuchart", {
         display: true,
         text: "CPU Hours Last Month",
         font: {
-          size: 20
+          size: 10
         }
       }
     },
     scales : {
+      x: {
+        ticks: {
+          font: {
+            size: 8
+          }
+        }
+      },
+
       y: {
         title: {
           display: true,
           text: "CPU Hours"
         },
         ticks: {
-          beginAtZero: true
+          beginAtZero: true,
+          font: {
+            size: 8
+          }
+
         }
       }
     }

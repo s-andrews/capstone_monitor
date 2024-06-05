@@ -413,7 +413,7 @@ def allstorage(date):
         "allstorage.html", 
         user_labels=str(ordered_users), 
         user_data=json.dumps(datasets) , 
-        graph_height = int(len(ordered_users)/2)+2,
+        graph_height = int(len(ordered_users)/2)+5,
         dates=str(timelabels),
         sizestime=str(timesizes),
         previous_dates=previous_dates[1:],

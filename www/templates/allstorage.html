@@ -7,12 +7,6 @@
     <h2>Storage Usage for All Users</h2>
   </div>
 
-  <div class="row">
-    <div style="width: 100%;" class="pt-5">
-      <canvas id="storagetimechart"></canvas>
-    </div>
-  </div>
-
   <div class="row pt-5">  
     <div class="col-md-2">
     Compare with
@@ -31,18 +25,23 @@
     
     </select>
     </div>
-  </div>
-
-
 
   <div class="row">
-    <div style="width: 100%;" class="pt-5">
-      <canvas id="storagechart" style="width: 100%; height: {{ graph_height }}em;"></canvas>
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="storagetimechart" style="width: 100%; height: 15em;"></canvas>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div style="width: 100%;" class="pt-5">
+        <canvas id="storagechart" style="width: 100%; height: {{ graph_height }}em;"></canvas>
+      </div>
     </div>
 
+    </div>
   </div>
 
-
+  </div>
 </div>
 
 {% endblock %}

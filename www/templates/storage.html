@@ -42,13 +42,13 @@
 
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="storagechart"></canvas>
+        <canvas id="storagechart" style="width: 100%; height: 100%"></canvas>
       </div>
     </div>
 
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="storagetimechart"></canvas>
+        <canvas id="storagetimechart" style="width: 100%; height: 100%"></canvas>
       </div>
     </div>
   </div>
@@ -85,6 +85,7 @@ new Chart("storagechart", {
   type: "bar",
   data: data,
   options: {
+    responsive: false,
     devicePixelRatio: 4,
     plugins: {
       legend: {
@@ -96,10 +97,23 @@ new Chart("storagechart", {
       x: {
         title: {
           display: true,
-          text: "Size (GB)"
+          text: "Size (GB)",
+          font: {
+            size: 8
+          }
         },
         ticks: {
-          beginAtZero: true
+          beginAtZero: true,
+          font: {
+            size: 6
+          }
+        }
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 8
+          }
         }
       }
     }
@@ -124,6 +138,7 @@ new Chart("storagetimechart", {
   type: "line",
   data: timedata,
   options: {
+    responsive: false,
     devicePixelRatio: 4,
     plugins: {
       legend: {
@@ -133,7 +148,7 @@ new Chart("storagetimechart", {
         display: true,
         text: "Usage over the last month",
         font: {
-          size: 20
+          size: 10
         }
       }
     },
@@ -141,9 +156,24 @@ new Chart("storagetimechart", {
       y: {
         title: {
           display: true,
-          text: "Size (GB)"
+          text: "Size (GB)",
+          font: {
+            size: 10
+          }
         },
-        beginAtZero: true
+        ticks: {
+          font: {
+            size: 8
+          }
+        },
+        beginAtZero: false
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 6
+          }
+        }
       }
     },
   }
