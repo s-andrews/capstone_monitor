@@ -1,8 +1,7 @@
 $( document ).ready(function() {
 
     $("#previousdates").change(pick_compare_date)
-
-    show_previous_folders()
+    
 
 })
 
