@@ -29,7 +29,7 @@
   <div class="row">
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="storagetimechart" style="width: 100%; height: 15em;"></canvas>
+        <canvas id="storagetimechart" style="width: 100%; height: 35em;"></canvas>
       </div>
     </div>
     <div class="col-md-6">
@@ -64,8 +64,14 @@ new Chart("storagechart", {
   data: data,
   options: {
     responsive: true,
-    devicePixelRatio: 4,
     plugins: {
+      legend: {
+        labels: {
+          font: {
+            size: 16
+          }
+        }
+      }
     },
     indexAxis: 'y',
     scales : {
@@ -73,16 +79,25 @@ new Chart("storagechart", {
         stacked: true,
         title: {
           display: true,
-          text: "Size (TB)"
+          text: "Size (TB)",
+          font: {
+            size: 16
+          }
         },
         ticks: {
-          beginAtZero: true
+          beginAtZero: true,
+          font: {
+            size: 16
+          }
         }
       },
       y: {
         stacked: true,
         ticks: {
-          autoSkip: false
+          autoSkip: false,
+          font: {
+            size: 16
+          }
         }
       }
     }
@@ -106,7 +121,6 @@ new Chart("storagetimechart", {
   type: "line",
   data: timedata,
   options: {
-    devicePixelRatio: 4,
     plugins: {
       legend: {
         display: false
@@ -123,9 +137,17 @@ new Chart("storagetimechart", {
       y: {
         title: {
           display: true,
-          text: "Size (TB)"
+          text: "Size (TB)",
+          font: {
+            size: 16
+          }
         },
-        beginAtZero: true
+        beginAtZero: true,
+        ticks: {
+          font: {
+            size: 16
+          }
+        }
       }
     },
   }

@@ -42,13 +42,13 @@
 
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="storagechart" style="width: 100%; height: 100%"></canvas>
+        <canvas id="storagechart" style="width: 100%; height: 20em"></canvas>
       </div>
     </div>
 
     <div class="col-md-6">
       <div style="width: 100%;" class="pt-5">
-        <canvas id="storagetimechart" style="width: 100%; height: 100%"></canvas>
+        <canvas id="storagetimechart" style="width: 100%; height: 20em"></canvas>
       </div>
     </div>
   </div>
@@ -85,8 +85,7 @@ new Chart("storagechart", {
   type: "bar",
   data: data,
   options: {
-    responsive: false,
-    devicePixelRatio: 4,
+    responsive: true,
     plugins: {
       legend: {
         display: false
@@ -99,20 +98,17 @@ new Chart("storagechart", {
           display: true,
           text: "Size (GB)",
           font: {
-            size: 8
+            size: 16
           }
         },
         ticks: {
-          beginAtZero: true,
-          font: {
-            size: 6
-          }
+          beginAtZero: true
         }
       },
       y: {
         ticks: {
           font: {
-            size: 8
+            size: 18
           }
         }
       }
@@ -138,18 +134,17 @@ new Chart("storagetimechart", {
   type: "line",
   data: timedata,
   options: {
-    responsive: false,
-    devicePixelRatio: 4,
+    responsive: true,
     plugins: {
       legend: {
         display: false
       },
       title: {
         display: true,
-        text: "Usage over the last month",
         font: {
-          size: 10
-        }
+          size: 24
+        },
+        text: "Usage over the last month"
       }
     },
     scales : {
@@ -158,22 +153,10 @@ new Chart("storagetimechart", {
           display: true,
           text: "Size (GB)",
           font: {
-            size: 10
-          }
-        },
-        ticks: {
-          font: {
-            size: 8
+            size: 16
           }
         },
         beginAtZero: false
-      },
-      x: {
-        ticks: {
-          font: {
-            size: 6
-          }
-        }
       }
     },
   }

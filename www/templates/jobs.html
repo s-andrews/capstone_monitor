@@ -100,18 +100,18 @@ new Chart("jobchart", {
   type: "doughnut",
   data: jobdata,
   options: {
-    devicePixelRatio: 4,
-    responsive: false,
+    responsive: true,
     plugins: {
       legend: {
-        display: true
+        display: true,
+        labels : {
+          font: {
+            size: 20
+          }
+        }
       },
       title: {
-        display: false,
-        text: "Job Summary Last Month",
-        font: {
-          size: 20
-        }
+        display: false
       }
     }
   }
@@ -134,8 +134,7 @@ new Chart("memchart", {
   type: "line",
   data: memdata,
   options: {
-    devicePixelRatio: 4,
-    responsive: false,
+    responsive: true,
     plugins: {
       legend: {
         display: false
@@ -144,7 +143,7 @@ new Chart("memchart", {
         display: true,
         text: "Job Memory Usage Last Month",
         font: {
-          size: 10
+          size: 24
         }
       }
     },
@@ -152,19 +151,22 @@ new Chart("memchart", {
       x: {
         ticks: {
           font: {
-            size: 8
+            size: 16
           }
         }
       },
       y: {
         title: {
           display: true,
-          text: "Memory GBH"
+          text: "Memory GBH",
+          font: {
+            size: 20
+          }
         },
         ticks: {
           beginAtZero: true,
           font: {
-            size: 8
+            size: 16
           }
         },
       }
@@ -189,8 +191,7 @@ new Chart("cpuchart", {
   type: "line",
   data: cpudata,
   options: {
-    responsive: false,
-    devicePixelRatio: 4,
+    responsive: true,
     plugins: {
       legend: {
         display: false
@@ -199,7 +200,7 @@ new Chart("cpuchart", {
         display: true,
         text: "CPU Hours Last Month",
         font: {
-          size: 10
+          size: 24
         }
       }
     },
@@ -207,7 +208,7 @@ new Chart("cpuchart", {
       x: {
         ticks: {
           font: {
-            size: 8
+            size: 16
           }
         }
       },
@@ -215,12 +216,15 @@ new Chart("cpuchart", {
       y: {
         title: {
           display: true,
-          text: "CPU Hours"
+          text: "CPU Hours",
+          font: {
+            size: 20
+          }
         },
         ticks: {
           beginAtZero: true,
           font: {
-            size: 8
+            size: 16
           }
 
         }
