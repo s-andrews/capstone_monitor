@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block css %}
+<style>
+#maincontent {
+    display: none;
+}
+</style>
+
 {# Not strictly CSS but it's in the head so it works #}
 <meta http-equiv="refresh" content="30">
 {% endblock %}
@@ -95,7 +101,47 @@
 
 {% endblock %}
 
+{% block modals %}
+    <div id="logindiv" class="modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">Log In</h2>
+            <img class="float-end" src="{{ url_for('static', filename='images/capstone_logo_path.svg') }}" width="200px">
+          </div>
+          <div class="modal-body">
+              <label for="username">Username</label>
+              <input class="form-control" type="text" id="username">
+              <label for="Password">Password</label>
+              <input class="form-control" type="password" id="password">
+              <button id="login" type="button" class="form-control btn btn-primary mt-2">Log In</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
 {% block js %}
+
+<script>
+$( document ).ready(function() {
+
+    show_login()
+
+    // Action when they log in
+    $("#login").click(process_login)
+    $("#password").keypress(function(e){
+        if(e.keyCode == 13){
+            process_login();
+        }
+    });
+})
+
+
+</script>
+
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

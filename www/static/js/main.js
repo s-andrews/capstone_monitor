@@ -4,19 +4,6 @@ $( document ).ready(function() {
         location.replace(`https:${location.href.substring(location.protocol.length)}`);
     }
 
-    show_login()
-
-    // Action when they log in
-    $("#login").click(process_login)
-    $("#password").keypress(function(e){
-        if(e.keyCode == 13){
-            process_login();
-        }
-    });
-
-    // Pressme button
-    $("#pressme").click(button_pressed)
-
     // Action when they log out
     $("#logout").click(logout)
 
@@ -56,12 +43,12 @@ function show_login() {
             {
                 url: "/validate_session",
                 method: "POST",
-                success: function(usersname) {
+                success: function(username) {
                     $("#logindiv").modal("hide")
 
                     $("#maincontent").show()
 
-                    $("#loginname").text(usersname)
+                    $("#loginname").text(username)
 
                 },
                 error: function(message) {
@@ -80,12 +67,9 @@ function show_login() {
 
 function logout() {
     Cookies.remove("capstone_session_id")
-    $("#maincontent").hide()
+    location.replace("/");
 
-    $("#logindiv").modal("show")
 }
-
-
 
 
 function process_login() {
