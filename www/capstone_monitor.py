@@ -753,6 +753,32 @@ def folders(username):
     # Sort the data by size 
     user_files = {k:v for k,v in sorted(user_files.items(), key=lambda i: i[1]["total"], reverse=True)}
 
+    uncompressed_extensions = {"txt","fastq","fq","sam","bed","bedgraph"}
+
+    # Go through and add a reason why some of these might be worth looking at
+    for folder,details in user_files.items():
+        if "temp" in folder.lower() or "tmp" in folder.lower():
+            details["reason"] = "Possible temporary folder"
+            continue
+
+        if "/work/" in folder:
+            details["reason"] = "SLURM work folder"
+            continue
+
+        if "log" in details["extensions"]:
+            details["reason"] = "Log file"
+            continue
+        
+        for extension in details["extensions"].keys():
+            if extension in uncompressed_extensions:
+                details["reason"] = "Large uncompressed data"
+                break
+
+        
+
+        
+
+
     # Change all of the sizes to something readable
     for details in user_files.values():
         details["total"] = make_readable_size(details["total"])

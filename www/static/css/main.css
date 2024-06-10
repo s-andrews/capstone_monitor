@@ -24,3 +24,7 @@ li.nav-item {
 tr.foldersize {
     display: none;
 }
+
+.alertsymbol {
+    cursor: help;
+}

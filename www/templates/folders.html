@@ -34,6 +34,7 @@
 
       <thead>
         <tr>
+          <th></th>
           <th>Folder</th>
           <th>Size</th>
           <th>Extensions</th>
@@ -41,6 +42,7 @@
         <tbody>
           {% for foldername in data %}
           <tr class="foldersize">
+            <td>{% if data[foldername]["reason"] %}<span class="alertsymbol" title="{{ data[foldername]['reason'] }}">&#9888;</span>{% endif %}</td>
             <td class="text-nowrap text-truncate" title="{{ foldername }}">{{ foldername }}</td>
             <td class="text-nowrap">{{ data[foldername]["total"] }}</td>
             <td class="text-nowrap">{% for extension in data[foldername]["extensions"] %} <strong>{{ extension }}</strong>({{ data[foldername]["extensions"][extension] }}){% endfor %}</strong></td>
