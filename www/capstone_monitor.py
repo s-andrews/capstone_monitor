@@ -192,6 +192,7 @@ def index():
         node_data=node_data, 
         userjobs=job_data,
         alerts=alerts, 
+        name=person["name"],
         isadmin=is_admin(person)
     )
 
@@ -285,6 +286,7 @@ def storage(username):
         totals=total_storage,
         username_list = username_list, 
         shown_username=username,
+        name = person["name"],
         isadmin=is_admin(person)
     )
 
@@ -418,6 +420,7 @@ def allstorage(date):
         sizestime=str(timesizes),
         previous_dates=previous_dates[1:],
         shown_date = date,
+        name = person["name"],
         isadmin=is_admin(person)
     )
 
@@ -551,6 +554,7 @@ def jobs(username):
         cpu_history=str(cpu_history),
         username_list=username_list,
         shown_username=username,
+        name = person["name"],
         isadmin=is_admin(person))
 
 
@@ -695,6 +699,7 @@ def alljobs():
         user_mem_usage=str(user_mem_usage),
         user_cpu_hours=str(user_cpu_hours),
         user_fail_usage=str(user_fail_usage),
+        name = person["name"],
         isadmin=is_admin(person)
     )
 
@@ -754,7 +759,14 @@ def folders(username):
         for extension in details["extensions"].keys():
             details["extensions"][extension] = make_readable_size(details["extensions"][extension])
     
-    return render_template("folders.html", data=user_files, person=person["name"], shown_username=username, username_list=username_list,isadmin=is_admin(person))
+    return render_template(
+        "folders.html", 
+        data=user_files, 
+        shown_username=username, 
+        username_list=username_list,
+        name = person["name"],
+        isadmin=is_admin(person)
+    )
 
 
 def make_readable_size(bytes):
