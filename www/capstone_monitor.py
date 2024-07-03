@@ -36,7 +36,7 @@ def index():
     with subprocess.Popen(["uptime"], stdout=subprocess.PIPE, encoding="utf8") as uptime_proc:
         line = uptime_proc.stdout.readline()
 
-        load_average = float(line.strip().split(",")[-1].strip())
+        load_average = float(line.strip().split(",")[-3].strip())
 
         if load_average > 10:
             alerts.append(f"High load average on head node ({load_average})")
