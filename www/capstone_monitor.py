@@ -36,11 +36,10 @@ def index():
     with subprocess.Popen(["uptime"], stdout=subprocess.PIPE, encoding="utf8") as uptime_proc:
         line = uptime_proc.stdout.readline()
 
-        load_average = float(line.strip().split(",")[-3].strip())
+        load_average = float(line.strip().split(",")[-3].split()[-1].strip())
 
         if load_average > 10:
             alerts.append(f"High load average on head node ({load_average})")
-
 
     # Are any nodes in trouble?
     good_status = ["idle","mix","alloc"]
@@ -57,16 +56,7 @@ def index():
 
             if not sections[-1] in good_status:
                 alerts.append(f"Node {sections[0]} is in state {sections[-1]}")
-
-
-        if load_average > 10:
-            alerts.append(f"High load average on head node ({load_average})")
-    
-
-
-        if not found_cpu_allocation:
-            alerts.append("CPU allocation update script is not running")
-    
+        
 
     node_data = {
         "total_storage": 0,
@@ -80,6 +70,7 @@ def index():
         "interactive_total_memory" : 0,
         "interactive_used_memory" : 0
     }
+
 
     form = get_form()
     if "session" not in form:
@@ -144,6 +135,7 @@ def index():
             sections = line.split()
             node_data["total_storage"] = int(sections[1][:-1])
             node_data["used_storage"] = int(sections[2][:-1])
+
 
 
     # We need the details of the current jobs in the queue
