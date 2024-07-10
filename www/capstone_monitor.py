@@ -148,6 +148,12 @@ def index():
             username = sections[1]
             running = sections[-1].startswith("compute")
             memory = int(sections[2][:-1])
+
+            # Memory is sometimes given in M instead of G
+            if sections[2][-1] == "M":
+                memory /= 1024
+                memory = float(round(memory,1))
+
             cpus = int(sections[3])
 
             # For pending jobs we might have an odd number of threads requested.  These will be rounded
@@ -522,7 +528,7 @@ def jobs(username):
         job_summary["total_time"] += dhms_to_seconds(sections[-2])
         job_summary["cpu_time"] += dhms_to_seconds(sections[3])
 
-        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60))
+        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60*1000))
 
         mem_history[days_ago] += memory
         cpu_history[days_ago] += dhms_to_seconds(sections[3])
@@ -616,7 +622,10 @@ def alljobs():
         if days_ago > 30:
             continue
 
-        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60))
+        memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60*1000))
+        if sections[4].strip()[-1] == "M":
+            memory /= 1024
+            memory = float(round(memory,1))
 
         job_summary["jobs"] += 1
 
