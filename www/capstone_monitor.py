@@ -490,9 +490,27 @@ def jobs(username):
         cpu_history.append(0)
 
 
+    field_lengths = []
 
     for line in sacct.stdout:
-        sections = line.strip().split()
+        if line.startswith("JobID"):
+            continue
+
+        if line.startswith("---"):
+            sections = line.strip().split()
+            for s in sections:
+                field_lengths.append(len(s))
+
+            continue
+
+
+        sections = []
+        position = 0
+        for flen in field_lengths:
+            sections.append(line[position:position+flen].strip())
+            position += flen
+            position += 1
+
 
         # We test for the first field being numeric to get the main
         # job entry. We remove underscores since array jobs will 
@@ -602,9 +620,27 @@ def alljobs():
         cpu_history.append(0)
 
 
+    field_lengths = []
 
     for line in sacct.stdout:
-        sections = line.strip().split()
+        if line.startswith("JobID"):
+            continue
+
+        if line.startswith("---"):
+            sections = line.strip().split()
+            for s in sections:
+                field_lengths.append(len(s))
+
+            continue
+
+
+        sections = []
+        position = 0
+        for flen in field_lengths:
+            sections.append(line[position:position+flen].strip())
+            position += flen
+            position += 1
+
 
         # We test for the first field being a number.  For array jobs
         # there may be an underscore in there too.
@@ -622,6 +658,7 @@ def alljobs():
         if days_ago > 30:
             continue
 
+        print(line)
         memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60*1000))
         if sections[4].strip()[-1] == "M":
             memory /= 1024
