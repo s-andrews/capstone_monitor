@@ -467,7 +467,7 @@ def jobs(username):
 
     # Get the current users list of jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",username,"-o","jobid,jobname,alloccpus,cputime,reqmem,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-S",one_month_ago,"-u",username,"-o","jobid,jobname,alloccpus,cputime%15,reqmem,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
@@ -593,7 +593,7 @@ def alljobs():
 
     # Get all jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
-    sacct = subprocess.Popen(["sacct","-a","-S",one_month_ago,"-o","jobid,jobname,alloccpus,cputime,reqmem,account,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
+    sacct = subprocess.Popen(["sacct","-a","-S",one_month_ago,"-o","jobid,jobname,alloccpus,cputime%15,reqmem,account,submit,elapsed,state"], stdout=subprocess.PIPE, encoding="utf8")
 
     job_summary = {
         "jobs":0,
