@@ -12,6 +12,7 @@ import time
 import subprocess
 import datetime
 
+
 app = Flask(__name__)
 
 
@@ -131,10 +132,9 @@ def index():
 
     for line in df.stdout:
         line = line.strip()
-        if line.startswith("Private-Cluster.local:/ifs/homes"):
-            sections = line.split()
-            node_data["total_storage"] = int(sections[1][:-1])
-            node_data["used_storage"] = int(sections[2][:-1])
+        sections = line.split()
+        node_data["total_storage"] = int(sections[1][:-1])
+        node_data["used_storage"] = int(sections[2][:-1])
 
 
 
@@ -230,9 +230,16 @@ def storage(username):
 
     if is_admin(person):
         # We need to get a list of the usernames
+        visible_usernames = get_visible_usernames(person["username"])
+
+        # Check the name they're trying to view
+        if not username in visible_usernames:
+            return redirect(url_for("index"))
+
         username_results = files.find({},{"username":1})
         for i in username_results:
-            username_list.append(i["username"])
+            if i["username"] in visible_usernames:
+                username_list.append(i["username"])
 
     
     # Get the latest storage results
@@ -424,6 +431,72 @@ def allstorage(date):
 
 
 def is_admin(person):
+    if person["username"] in server_conf["group_leaders"]:
+        # They are a group leader
+        return True
+
+    # All members of bics or bioinformatics are also admins
+    groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
+    _,groups = groups.stdout.split(":")
+    groups = groups.split()
+    return "bioinf" in groups or "bics" in groups
+
+    
+
+def get_visible_usernames(username):
+
+    # We send back a list of all of the users in this persons group, unless
+    # it's someone from bioinformatics or bics in which case they can see
+    # everything.
+
+    visible_usernames = []
+
+    if username in server_conf["group_leaders"]:
+
+        groupname = server_conf["group_leaders"][username]
+
+        # We need the gid of the group and any secondary memberships from the groups file
+        secondary_members = []
+        gid = 0
+
+        with subprocess.Popen(["getent","group",groupname], stdout=subprocess.PIPE, encoding="utf8") as entps:
+            sections = entps.stdout.readline().strip().split(":")
+            gid = sections[2]
+            secondary_members = sections[3:]
+
+
+        # Now we can go through all password entries getting any entry with the expected gid
+        # or any account in the secondary list
+            
+        with subprocess.Popen(["getent","passwd"], stdout=subprocess.PIPE, encoding="utf8") as entps:
+            for line in entps.stdout:
+                sections = line.strip().split(":")
+
+                username = sections[0]
+                if sections[3] == gid:
+                    visible_usernames.append(username)
+
+                elif username in secondary_members:
+                    visible_usernames.append(username)
+
+    else:
+        # They should be a member of bioinf or bics
+
+        groups = subprocess.run(["groups",username], capture_output=True, encoding="utf8")
+        _,groups = groups.stdout.split(":")
+        groups = groups.split()
+        if not ("bioinf" in groups or "bics" in groups):
+            raise Exception("This person doesn't appear to be an admin")
+
+
+        with subprocess.Popen(["getent","passwd"], stdout=subprocess.PIPE, encoding="utf8") as entps:
+            for line in entps.stdout:
+                sections = line.strip().split(":")
+                visible_usernames.append(sections[0])
+
+
+    return visible_usernames 
+    
 
     groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
     _,groups = groups.stdout.split(":")
@@ -459,9 +532,17 @@ def jobs(username):
 
     if is_admin(person):
         # We need to get a list of the usernames
+        visible_usernames = get_visible_usernames(person["username"])
+
+        # Check the name they're viewing
+        if not username in visible_usernames:
+            return redirect(url_for("index"))
+
+
         username_results = files.find({},{"username":1})
         for i in username_results:
-            username_list.append(i["username"])
+            if i["username"] in visible_usernames:
+                username_list.append(i["username"])
 
     
 
@@ -779,9 +860,16 @@ def folders(username):
 
     if is_admin(person):
         # We need to get a list of the usernames
+        visible_usernames = get_visible_usernames(person["username"])
+
+        # Check the name they're trying to get
+        if not username in visible_usernames:
+            return redirect(url_for("index"))
+            
         username_results = files.find({},{"username":1})
         for i in username_results:
-            username_list.append(i["username"])
+            if i["username"] in visible_usernames:
+                username_list.append(i["username"])
 
 
     user_files = files.find_one({"username":username})

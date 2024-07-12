@@ -9,6 +9,9 @@
         "failed_logins_per_ip": 20,
         "failed_logins_per_user": 5,
         "lockout_time_mins": 15
+    },
+    "group_leaders" : {
+        "username" : "group_name"
     }
    
 }
