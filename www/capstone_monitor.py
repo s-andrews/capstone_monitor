@@ -132,6 +132,8 @@ def index():
 
     for line in df.stdout:
         line = line.strip()
+        if line.startswith("Filesystem"):
+            continue
         sections = line.split()
         node_data["total_storage"] = int(sections[1][:-1])
         node_data["used_storage"] = int(sections[2][:-1])
