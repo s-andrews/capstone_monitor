@@ -755,7 +755,6 @@ def alljobs():
         if days_ago > 30:
             continue
 
-        print(line)
         memory = int(sections[4].strip()[:-1])*((dhms_to_seconds(sections[-2]))/(60*60*1000))
         if sections[4].strip()[-1] == "M":
             memory /= 1024
