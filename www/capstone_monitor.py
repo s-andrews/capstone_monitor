@@ -315,9 +315,14 @@ def allstorage(date):
     # This is for admins only
     if not is_admin(person):
         return redirect(url_for("index"))
+    
+    visible_usernames = get_visible_usernames(person["username"])
 
     # Get the latest storage results
     storage_data = storagec.find({}).sort({"date":-1}).limit(1).next()
+
+    # Filter this against the usernames we're allowed to see
+    storage_data["data"] = {x:y for x,y in storage_data["data"].items() if x in visible_usernames}
 
     # Get the dates for the last 50 results
     previous_dates_results = storagec.find({},{"date":1}).sort({"date":-1}).limit(50)
@@ -674,7 +679,8 @@ def alljobs():
     # This is for admins only
     if not is_admin(person):
         return redirect(url_for("index"))
-
+    
+    visible_users = get_visible_usernames(person["username"])
 
     # Get all jobs for the last month
     one_month_ago = str(datetime.datetime.now()-datetime.timedelta(days=30)).split()[0]
@@ -733,6 +739,12 @@ def alljobs():
             continue
         
         username = sections[-4]
+
+        # They may not be able to look at this user
+        if not username in visible_users:
+            continue
+
+
         if not username in user_summary:
             user_summary[username] = {"mem":0, "cpu":0, "fails":0}
 
