@@ -281,6 +281,7 @@ def storage(username):
     total_storage["lifetime_cost"] = f"{int(total_storage['total_size']*1.32):,}"
     total_storage["total_size"] = f"{int(total_storage['total_size']):,}"
 
+    username_list.sort()
 
 
     return render_template(
@@ -496,7 +497,6 @@ def get_visible_usernames(username):
                 sections = line.strip().split(":")
                 visible_usernames.append(sections[0])
 
-
     return visible_usernames 
     
 
@@ -644,6 +644,8 @@ def jobs(username):
     history_labels = history_labels[::-1]
     mem_history = mem_history[::-1]
     cpu_history = cpu_history[::-1]
+
+    username_list.sort()
 
     return render_template(
         "jobs.html", 
@@ -902,17 +904,15 @@ def folders(username):
                 details["reason"] = "Large uncompressed data"
                 break
 
-        
-
-        
-
-
     # Change all of the sizes to something readable
     for details in user_files.values():
         details["total"] = make_readable_size(details["total"])
         for extension in details["extensions"].keys():
             details["extensions"][extension] = make_readable_size(details["extensions"][extension])
     
+
+    username_list.sort()
+
     return render_template(
         "folders.html", 
         data=user_files, 
