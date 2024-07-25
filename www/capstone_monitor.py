@@ -43,7 +43,7 @@ def index():
             alerts.append(f"High load average on head node ({load_average})")
 
     # Are any nodes in trouble?
-    good_status = ["idle","mix","alloc"]
+    good_status = ["idle","mix","alloc","comp"]
     with subprocess.Popen(["sinfo","-N"], stdout=subprocess.PIPE, encoding="utf8") as sinfo_proc:
         sinfo_proc.stdout.readline() # Throw away header
 
