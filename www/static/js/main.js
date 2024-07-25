@@ -50,6 +50,11 @@ function show_login() {
 
                     $("#loginname").text(username)
 
+                    // Set a refresh timeout to reload
+                    setTimeout(function() {
+                        location.reload(true)
+                    },10000);
+
                 },
                 error: function(message) {
                     console.log("Existing session didn't validate")
