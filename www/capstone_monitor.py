@@ -619,14 +619,16 @@ def jobs(username):
 
         status = sections[-1].replace("+","")
 
-        if status=="COMPLETED":
+        if status=="RUNNING":
+            pass
+        elif status=="COMPLETED":
             job_summary["completed"] += 1
-        elif status=="FAILED":
+        elif status=="FAILED" or status=="OUT_OF_ME":
             job_summary["failed"] += 1
         elif status=="CANCELLED":
             job_summary["cancelled"] += 1
         else:
-            print("Unknown status ",status)
+            print("Unknown status '",status,"'")
 
 
 
@@ -763,9 +765,12 @@ def alljobs():
 
         status = sections[-1].replace("+","")
 
-        if status=="COMPLETED":
+
+        if status=="RUNNING":
+            pass
+        elif status=="COMPLETED":
             job_summary["completed"] += 1
-        elif status=="FAILED":
+        elif status=="FAILED" or status=="OUT_OF_ME":
             job_summary["failed"] += 1
             user_summary[username]["fails"] += 1
         elif status=="CANCELLED":
@@ -795,19 +800,19 @@ def alljobs():
 
 
     # Find the top users
-    mem_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["mem"], reverse=True)
+    mem_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["mem"], reverse=True)[:15]
     user_mem_usage = []
     for user in mem_usernames:
         user_mem_usage.append(user_summary[user]["mem"])
 
 
-    cpu_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["cpu"], reverse=True)
+    cpu_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["cpu"], reverse=True)[:15]
     user_cpu_hours = []
     for user in cpu_usernames:
         user_cpu_hours.append(round(user_summary[user]["cpu"]/(60*60),1))
 
 
-    fail_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["fails"], reverse=True)
+    fail_usernames = sorted(user_summary.keys(), key=lambda x: user_summary[x]["fails"], reverse=True)[:15]
     user_fail_usage = []
     for user in fail_usernames:
         if user_summary[user]["fails"] == 0:
