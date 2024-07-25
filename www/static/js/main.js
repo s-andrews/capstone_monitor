@@ -53,7 +53,7 @@ function show_login() {
                     // Set a refresh timeout to reload
                     setTimeout(function() {
                         location.reload(true)
-                    },10000);
+                    },60000);
 
                 },
                 error: function(message) {
