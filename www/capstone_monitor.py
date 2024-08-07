@@ -40,7 +40,8 @@ def index():
         load_average = float(line.strip().split(",")[-3].split()[-1].strip())
 
         if load_average > 10:
-            alerts.append(f"High load average on head node ({load_average})")
+            biggest_user, biggest_cpu = get_biggest_user()
+            alerts.append(f"High load average ({load_average}) on head node. Highest user is {biggest_user} at {biggest_cpu}% CPU")
 
     # Are any nodes in trouble?
     good_status = ["idle","mix","alloc","comp"]
@@ -194,6 +195,41 @@ def index():
         name=person["name"],
         isadmin=is_admin(person)
     )
+
+
+def get_biggest_user():
+
+    user_sums = {}
+
+    with subprocess.Popen(["top","-b","-n1"], stdout=subprocess.PIPE, encoding="utf8") as proc:
+
+        for _ in range(7):
+            proc.stdout.readline()
+
+        for line in proc.stdout:
+            line = line.strip()
+            sections = line.split()
+            username = sections[1]
+            cpu = float(sections[8])
+
+            if not username in user_sums:
+                user_sums[username] = 0
+
+            user_sums[username] += cpu
+
+    biggest_user = ""
+    biggest_cpu = 0
+
+    for user in user_sums:
+        if user_sums[user] > biggest_cpu:
+            biggest_user = user
+            biggest_cpu = user_sums[user]
+
+
+    return (biggest_user,biggest_cpu)
+            
+
+
 
 
 def is_memory_per_cpu(jobid):
