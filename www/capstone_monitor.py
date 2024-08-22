@@ -165,8 +165,11 @@ def index():
 
             # Annoyingly from the squeue output we can't tell the difference between
             # memory per cpu or memory per node.  Most will be per node, but the only
-            # way to actually tell is to run scontrol
-            if is_memory_per_cpu(sections[0]):
+            # way to actually tell is to run scontrol.
+            #
+            # This operation is quite slow so I'm only going to do this for running
+            # jobs since I don't really care about the memory of queued jobs.
+            if running and is_memory_per_cpu(sections[0]):
                 memory *= cpus
 
 
