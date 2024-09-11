@@ -186,9 +186,18 @@ def index():
                 user_jobs[username]["queued_memory"] += memory
 
 
+    # Round the values
+    for user in user_jobs:
+        if not user_jobs[user]["used_memory"].is_integer():
+            user_jobs[user]["used_memory"] = round(user_jobs[user]["used_memory"],1)
+
+        if not user_jobs[user]["queued_memory"].is_integer():
+            user_jobs[user]["queued_memory"] = round(user_jobs[user]["queued_memory"],1)
+
     # Put the results in a list
     job_data = list(user_jobs.values())
     job_data.sort(key=lambda x: x["running_jobs"]+x["queued_jobs"], reverse=True)
+
 
     return render_template(
         "index.html",
