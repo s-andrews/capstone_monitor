@@ -11,6 +11,7 @@ import string
 import random
 import os
 from pathlib import Path
+import time
 
 def main():
     options = get_options()
@@ -50,6 +51,7 @@ def create_alias(user,server,port,jobid):
         with open("/etc/httpd/conf.d/rstudio-server.conf","rt", encoding="utf8") as infh:
 
             for line in infh:
+                line = line.strip()
                 if line.startswith("#") and line[1:].split()[0] == user:
                     # We have an old entry for this user we need to remove
                     # We need to get rid of the next two lines as well
@@ -73,7 +75,12 @@ def create_alias(user,server,port,jobid):
     # Now we can copy the new version of the file over the top of the old
     # version and restart the http server so the new alias is picked up.
     os.rename("/etc/httpd/conf.d/rstudio-server.conf.new","/etc/httpd/conf.d/rstudio-server.conf")
-    subprocess.run(["systemctl","reload","httpd"])   
+    subprocess.run(["systemctl","reload","httpd"])
+
+    # So it seems that the reload doesn't happen immediately but that there is a slight
+    # delay.  We're therefore going to kludge a short wait of 5 seconds to give it chance 
+    # to complete before we send people to the new url
+    time.sleep(5)
     
 
     return(f"http://capstone.babraham.ac.uk/rstudio/{random_id}/")
