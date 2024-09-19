@@ -1,0 +1,1 @@
+andrewss ALL=(root) NOPASSWD: /bi/home/andrewss/capstone_monitor/scripts/start_rstudio_session.py
