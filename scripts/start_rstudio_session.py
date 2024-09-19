@@ -83,14 +83,20 @@ def create_server(user,mem,port):
 
     # For the server to work we need to create a database configuration file
     # in the users home directory.
-
     conf_file = Path(f"/bi/home/{user}/rstudio_database.conf")
+
+
+    # We also need to remove any existing database information in ~/rstudio-server
+    server_dir = Path(f"/bi/home/{user}/rstudio-server")
+    if server_dir.exists():
+        for file in server_dir.iterdir():
+            file.unlink()
 
     if not conf_file.exists():
         with open(conf_file,"wt", encoding="utf8") as out:
             print(f"directory=/bi/home/{user}/rstudio-server", file=out)
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user=andrewss --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
