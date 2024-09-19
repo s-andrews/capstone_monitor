@@ -57,8 +57,8 @@ def create_alias(user,server,port,jobid):
         
         # Add the new server
         print(f"#{user} {server} {port} {jobid}", file=out)
-        print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}", file=out)
-        print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}", file=out)
+        print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/", file=out)
+        print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
                 
 
 
