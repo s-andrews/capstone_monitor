@@ -48,7 +48,14 @@ def create_alias(user,server,port,jobid):
         with open("/etc/httpd/conf.d/rstudio-server.conf","rt", encoding="utf8") as infh:
 
             for line in infh:
-                print(line, file=out)
+                if line.startswith("#") and line[1:].split()[0] == user:
+                    # We have an old entry for this user we need to remove
+                    # We need to get rid of the next two lines as well
+                    infh.readline()
+                    infh.readline()
+
+                else:
+                    print(line, file=out)
 
         # Make a random id
         random_id = ""
@@ -61,11 +68,13 @@ def create_alias(user,server,port,jobid):
         print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
                 
 
+    # Now we can copy the new version of the file over the top of the old
+    # version and restart the http server so the new alias is picked up.
 
 
 def create_server(user,mem,port):
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -otest.log -Jrstudioserv --nodelist=compute-1-2 -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user=andrewss --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -otest.log -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user=andrewss --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R\""
 
     print(command)
 
@@ -100,7 +109,7 @@ def check_existing_server(user):
                     job = sections[3]
 
                     # We need to see if this job is still running
-                    proc = subprocess.run(["squeue","-j",job])
+                    proc = subprocess.run(["squeue","-j",job], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
                     if proc.returncode == 0:
                         # The job is still running so we're good
                         # The next line will have the random code
