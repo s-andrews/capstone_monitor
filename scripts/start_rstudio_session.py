@@ -9,6 +9,8 @@ import argparse
 import subprocess
 import string
 import random
+import os
+from pathlib import Path
 
 def main():
     options = get_options()
@@ -20,10 +22,10 @@ def main():
 
     else:
         port = find_free_port()
-        #jobid,server = create_server(options.user, options.mem, port)
-        #url = create_alias(options.user,server,port,jobid)
+        jobid,server = create_server(options.user, options.mem, port)
+        url = create_alias(options.user,server,port,jobid)
 
-        #print(url)
+        print(url)
 
 def find_free_port():
     used_ports = set()
@@ -70,13 +72,25 @@ def create_alias(user,server,port,jobid):
 
     # Now we can copy the new version of the file over the top of the old
     # version and restart the http server so the new alias is picked up.
+    os.rename("/etc/httpd/conf.d/rstudio-server.conf.new","/etc/httpd/conf.d/rstudio-server.conf")
+    subprocess.run(["systemctl","reload","httpd"])   
+    
+
+    return(f"http://capstone.babraham.ac.uk/rstudio/{random_id}/")
 
 
 def create_server(user,mem,port):
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -otest.log -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user=andrewss --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R\""
+    # For the server to work we need to create a database configuration file
+    # in the users home directory.
 
-    print(command)
+    conf_file = Path(f"/bi/home/{user}/rstudio_database.conf")
+
+    if not conf_file.exists():
+        with open(conf_file,"wt", encoding="utf8") as out:
+            print(f"directory=/bi/home/{user}/rstudio-server", file=out)
+
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user=andrewss --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
@@ -89,9 +103,7 @@ def create_server(user,mem,port):
         queue_output = subprocess.check_output(f"squeue -j {job_id}", shell=True, encoding="utf8")
         node = queue_output.strip().split("\n")[-1].split()[-1]
         if node.startswith("compute"):
-            break
-
-    return (job_id,node)
+            return (job_id,node)
 
 def check_existing_server(user):
     # We read through the current conf file to see if we find this user.
@@ -104,19 +116,20 @@ def check_existing_server(user):
             if line.startswith("#"):
                 sections = line.strip().split()
                 if sections[0][1:] == user:
-                    server = sections[1]
-                    port = sections[2]
                     job = sections[3]
 
                     # We need to see if this job is still running
-                    proc = subprocess.run(["squeue","-j",job], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                    if proc.returncode == 0:
-                        # The job is still running so we're good
-                        # The next line will have the random code
-                        # which gives us the url
+                    # We can run squeue, and we'll either get an error
+                    # because it doesn't recognise the ID, or we'll get
+                    # an output with only one line in it.
+                    proc = subprocess.run(["squeue","-j",job], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE, encoding="utf8")
+                
+                    if proc.returncode == 0 and "compute" in proc.stdout:
                         url = infh.readline().split()[1]
-
                         return "http://capstone.babraham.ac.uk"+url
+                    
+    return None
+
 def get_options():
     parser = argparse.ArgumentParser("Launch rstudio server sessions")
     parser.add_argument("--user",type=str, help="Username under which to launch", required=True)
