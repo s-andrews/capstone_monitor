@@ -558,6 +558,45 @@ def get_visible_usernames(username):
     return "bioinf" in groups or "bics" in groups
 
 
+@app.route("/launch_program/<program>")
+def launch_program(program):
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+
+    if program == "rstudio":
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/start_rstudio_session.py","--user",person["username"]],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            return redirect(proc.stdout.strip())
+        else:
+            raise Exception("Couldn't launch rstudio session")
+
+    raise Exception("Don't know program "+program)
+
+
+
+@app.route("/programs")
+def programs():
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+
+    return(render_template(
+        "programs.html",
+        name=person["name"],
+        isadmin=is_admin(person)
+
+    ))
+
+
 
 @app.route("/jobs", defaults={"username":None})
 @app.route("/jobs/<username>")
