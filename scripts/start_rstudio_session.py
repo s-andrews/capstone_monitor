@@ -20,10 +20,10 @@ def main():
 
     else:
         port = find_free_port()
-        jobid,server = create_server(options.user, options.mem, port)
-        url = create_alias(options.user,server,port,jobid)
+        #jobid,server = create_server(options.user, options.mem, port)
+        #url = create_alias(options.user,server,port,jobid)
 
-        print(url)
+        #print(url)
 
 def find_free_port():
     used_ports = set()
@@ -85,8 +85,29 @@ def create_server(user,mem,port):
     return (job_id,node)
 
 def check_existing_server(user):
-    return None
+    # We read through the current conf file to see if we find this user.
+    # If they're in there then we check to see if the job which started
+    # their server is still running and if it is we just need to redirect
+    # them back to that.
 
+    with open("/etc/httpd/conf.d/rstudio-server.conf","rt", encoding="utf8") as infh:
+        for line in infh:
+            if line.startswith("#"):
+                sections = line.strip().split()
+                if sections[0][1:] == user:
+                    server = sections[1]
+                    port = sections[2]
+                    job = sections[3]
+
+                    # We need to see if this job is still running
+                    proc = subprocess.run(["squeue","-j",job])
+                    if proc.returncode == 0:
+                        # The job is still running so we're good
+                        # The next line will have the random code
+                        # which gives us the url
+                        url = infh.readline().split()[1]
+
+                        return "http://capstone.babraham.ac.uk"+url
 def get_options():
     parser = argparse.ArgumentParser("Launch rstudio server sessions")
     parser.add_argument("--user",type=str, help="Username under which to launch", required=True)
