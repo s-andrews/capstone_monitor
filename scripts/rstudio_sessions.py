@@ -111,7 +111,7 @@ def create_alias(user,server,port,jobid):
     time.sleep(5)
     
 
-    return(f"http://capstone.babraham.ac.uk/rstudio/{random_id}/")
+    return(f"https://capstone.babraham.ac.uk/rstudio/{random_id}/")
 
 
 def create_server(user,mem,port):
@@ -167,7 +167,7 @@ def check_existing_server(user):
                 
                     if proc.returncode == 0 and "compute" in proc.stdout:
                         url = infh.readline().split()[1]
-                        return (job,"http://capstone.babraham.ac.uk"+url)
+                        return (job,"https://capstone.babraham.ac.uk"+url)
                     
     return None
 

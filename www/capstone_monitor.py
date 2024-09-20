@@ -552,14 +552,14 @@ def get_visible_usernames(username):
     return visible_usernames 
     
 
-    groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
-    _,groups = groups.stdout.split(":")
-    groups = groups.split()
-    return "bioinf" in groups or "bics" in groups
+    # groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
+    # _,groups = groups.stdout.split(":")
+    # groups = groups.split()
+    # return "bioinf" in groups or "bics" in groups
 
-
-@app.route("/launch_program/<program>")
-def launch_program(program):
+@app.route("/launch_program/<program>", defaults={"memory":20})
+@app.route("/launch_program/<program>/<memory>")
+def launch_program(program,memory):
     form = get_form()
     if "session" not in form:
         return redirect(url_for("index"))
@@ -569,9 +569,17 @@ def launch_program(program):
         return redirect(url_for("index"))
 
     if program == "rstudio":
-        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py",person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+
+        # Find out if rstudio is running.  If it's runnign already we get the URL
+        # and then redirect to it.  If it's not then we just print the URL
+        rstudio_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py", person["username"],"list"], encoding="utf8")
+
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py","--mem",str(memory),person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
         if proc.returncode == 0:
-            return redirect(proc.stdout.strip())
+            if rstudio_running:
+                return redirect(proc.stdout.strip())
+            else:
+                return proc.stdout.strip()
         else:
             raise Exception("Couldn't launch rstudio session")
 
