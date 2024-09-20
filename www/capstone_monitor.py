@@ -569,7 +569,7 @@ def launch_program(program):
         return redirect(url_for("index"))
 
     if program == "rstudio":
-        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/start_rstudio_session.py","--user",person["username"]],stdout=subprocess.PIPE, encoding="utf8")
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py",person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
         if proc.returncode == 0:
             return redirect(proc.stdout.strip())
         else:
@@ -577,6 +577,25 @@ def launch_program(program):
 
     raise Exception("Don't know program "+program)
 
+@app.route("/stop_program/<program>")
+def stop_program(program):
+    form = get_form()
+    if "session" not in form:
+        return redirect(url_for("index"))
+    try:
+        person = checksession(form["session"])
+    except:
+        return redirect(url_for("index"))
+
+    if program == "rstudio":
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            time.sleep(5)
+            return redirect(url_for("programs"))
+        else:
+            raise Exception("Couldn't launch rstudio session")
+
+    raise Exception("Don't know program "+program)
 
 
 @app.route("/programs")
@@ -588,10 +607,14 @@ def programs():
         person = checksession(form["session"])
     except:
         return redirect(url_for("index"))
+    
+    # Find out if rstudio is running.
+    rstudio_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py", person["username"],"list"], encoding="utf8")
 
     return(render_template(
         "programs.html",
         name=person["name"],
+        rstudio_running = rstudio_running,
         isadmin=is_admin(person)
 
     ))

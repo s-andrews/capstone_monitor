@@ -5,7 +5,16 @@
 
 
   <div class="row">
-    <a href="{{ url_for('launch_program', program='rstudio') }}"><img src="{{ url_for('static', filename='images/programs/rstudio.png') }}"></a>
+    <div class="col-md-4">
+      <img width="100%" src="{{ url_for('static', filename='images/programs/rstudio.png') }}">
+    </div>
+    <div class="col-md-4 my-auto text-center">
+      <h2 id="rstudio_state">{% if rstudio_running %}Rstudio is running{% else %}Rstudio inactive{% endif %}</h2>
+    </div>
+    <div class="col-md-4 my-auto">
+      <a href="{{ url_for('launch_program', program='rstudio') }}" target="_rstudio" class="btn btn-primary btn-lg">Launch RStudio</a>
+      {% if rstudio_running %}<a href="{{ url_for('stop_program', program='rstudio') }}" class="btn btn-danger btn-lg">Stop RStudio</a>{% endif %}
+    </div>
   </div>
 
 </div>
