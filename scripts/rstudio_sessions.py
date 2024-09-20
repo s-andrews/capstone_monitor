@@ -15,11 +15,39 @@ import time
 
 def main():
     options = get_options()
+    if options.action == "start":
+        action_start(options)
 
-    url = check_existing_server(options.user)
+    elif options.action == "list":
+        job_id = action_list(options)
+        print(job_id)
 
-    if url is not None:
-        print(url)
+    elif options.action == "stop":
+        action_stop(options)
+
+
+def action_list(options):
+    check_answer = check_existing_server(options.user)
+    if check_answer is None:
+        return None
+    return check_answer[0]
+
+def action_stop(options):
+    check_answer = check_existing_server(options.user)
+    if check_answer is None:
+        return
+
+    subprocess.run(["scancel",check_answer[0]])
+
+
+def action_start(options):
+
+    # We're starting a new server, but only if there isn't one running already.
+
+    check_answer = check_existing_server(options.user)
+
+    if check_answer is not None:
+        print(check_answer[1])
 
     else:
         port = find_free_port()
@@ -139,14 +167,15 @@ def check_existing_server(user):
                 
                     if proc.returncode == 0 and "compute" in proc.stdout:
                         url = infh.readline().split()[1]
-                        return "http://capstone.babraham.ac.uk"+url
+                        return (job,"http://capstone.babraham.ac.uk"+url)
                     
     return None
 
 def get_options():
     parser = argparse.ArgumentParser("Launch rstudio server sessions")
-    parser.add_argument("--user",type=str, help="Username under which to launch", required=True)
+    parser.add_argument("user",type=str, help="Username under which to launch")
     parser.add_argument("--mem", type=int, help="Memory in GB to allocate", default=20)
+    parser.add_argument("action",type=str,help="Action to perform [start / stop / list]")
 
     options = parser.parse_args()
 
