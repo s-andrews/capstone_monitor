@@ -570,7 +570,7 @@ def launch_program(program,memory):
 
     if program == "rstudio":
 
-        # Find out if rstudio is running.  If it's runnign already we get the URL
+        # Find out if rstudio is running.  If it's running already we get the URL
         # and then redirect to it.  If it's not then we just print the URL
         rstudio_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py", person["username"],"list"], encoding="utf8")
 

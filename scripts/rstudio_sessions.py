@@ -82,7 +82,8 @@ def create_alias(user,server,port,jobid):
                 line = line.strip()
                 if line.startswith("#") and line[1:].split()[0] == user:
                     # We have an old entry for this user we need to remove
-                    # We need to get rid of the next two lines as well
+                    # We need to get rid of the next three lines as well
+                    infh.readline()
                     infh.readline()
                     infh.readline()
 
@@ -98,6 +99,7 @@ def create_alias(user,server,port,jobid):
         print(f"#{user} {server} {port} {jobid}", file=out)
         print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/", file=out)
         print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
+        print(f"ProxyPassReverse /rstudio/{random_id}/ https://{server}:{port}/", file=out)
                 
 
     # Now we can copy the new version of the file over the top of the old
@@ -131,7 +133,7 @@ def create_server(user,mem,port):
         with open(conf_file,"wt", encoding="utf8") as out:
             print(f"directory=/bi/home/{user}/rstudio-server", file=out)
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir /tmp/rstudio-server/{user} --server-pid-file /tmp/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 

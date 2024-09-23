@@ -20,7 +20,7 @@
     </div>
       <div class="col-md-2 my-auto">
       {% if rstudio_running %}
-      <a href="{{ url_for('stop_program', program='rstudio') }}" class="btn btn-danger btn-lg needsrefresh">Stop RStudio</a>
+      <a id="stoprstudio" href="{{ url_for('stop_program', program='rstudio') }}" class="btn btn-danger btn-lg">Stop RStudio</a>
       {% else %}
       <label for="rstudiomemory" class="form-label">Use <span id="selectedrstudiomemory">20</span> GB Memory</label>
       <input type="range" class="form-range" id="rstudiomemory" min="10" max="80" step="1" value="20">
