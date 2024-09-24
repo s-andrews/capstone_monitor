@@ -583,6 +583,22 @@ def launch_program(program,memory):
         else:
             raise Exception("Couldn't launch rstudio session")
 
+    elif program == "jupyterlab":
+
+        # Find out if jupyterlab is running.  If it's running already we get the URL
+        # and then redirect to it.  If it's not then we just print the URL
+        jupyterlab_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py", person["username"],"list"], encoding="utf8")
+
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py","--mem",str(memory),person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            if jupyterlab_running:
+                return redirect(proc.stdout.strip())
+            else:
+                return proc.stdout.strip()
+        else:
+            raise Exception("Couldn't launch jupyterlab session")
+
+
     raise Exception("Don't know program "+program)
 
 @app.route("/stop_program/<program>")
@@ -601,7 +617,16 @@ def stop_program(program):
             time.sleep(5)
             return redirect(url_for("programs"))
         else:
-            raise Exception("Couldn't launch rstudio session")
+            raise Exception("Couldn't stop rstudio session")
+        
+
+    elif program == "jupyterlab":
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            time.sleep(5)
+            return redirect(url_for("programs"))
+        else:
+            raise Exception("Couldn't stop jupyterlab session")
 
     raise Exception("Don't know program "+program)
 
@@ -619,10 +644,15 @@ def programs():
     # Find out if rstudio is running.
     rstudio_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py", person["username"],"list"], encoding="utf8")
 
+    # Find out if jupyterlab is running.
+    jupyterlab_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py", person["username"],"list"], encoding="utf8")
+
+
     return(render_template(
         "programs.html",
         name=person["name"],
         rstudio_running = rstudio_running,
+        jupyterlab_running=jupyterlab_running,
         isadmin=is_admin(person)
 
     ))

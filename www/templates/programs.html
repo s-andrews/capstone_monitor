@@ -5,20 +5,20 @@
 
 
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <img width="100%" src="{{ url_for('static', filename='images/programs/rstudio.png') }}">
     </div>
-    <div class="col-md-4 my-auto text-center">
+    <div class="col-md-3 my-auto text-center">
       <h2 id="rstudio_state">{% if rstudio_running %}Rstudio is running{% else %}Rstudio inactive{% endif %}</h2>
     </div>
-    <div class="col-md-2 my-auto">
+    <div class="col-md-3 my-auto">
       {% if rstudio_running %}
       <a href="{{ url_for('launch_program', program='rstudio') }}" target="_rstudio" class="btn btn-primary btn-lg">Open RStudio</a>
       {% else %}
       <button id="startrstudio" class="btn btn-primary btn-lg">Start RStudio</a>
       {% endif %}
     </div>
-      <div class="col-md-2 my-auto">
+      <div class="col-md-3 my-auto">
       {% if rstudio_running %}
       <a id="stoprstudio" href="{{ url_for('stop_program', program='rstudio') }}" class="btn btn-danger btn-lg">Stop RStudio</a>
       {% else %}
@@ -27,6 +27,32 @@
       {% endif %}
     </div>
   </div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <img width="100%" src="{{ url_for('static', filename='images/programs/jupyterlab.svg') }}">
+    </div>
+    <div class="col-md-3 my-auto text-center">
+      <h2 id="jupyterlab_state">{% if jupyterlab_running %}Jupyterlab is running{% else %}Jupyterlab inactive{% endif %}</h2>
+    </div>
+    <div class="col-md-3 my-auto">
+      {% if jupyterlab_running %}
+      <a href="{{ url_for('launch_program', program='jupyterlab') }}" target="_jupyterlab" class="btn btn-primary btn-lg">Open Jupyterlab</a>
+      {% else %}
+      <button id="startjupyterlab" class="btn btn-primary btn-lg">Start Jupyterlab</a>
+      {% endif %}
+    </div>
+      <div class="col-md-3 my-auto">
+      {% if jupyterlab_running %}
+      <a id="stopjupyterlab" href="{{ url_for('stop_program', program='jupyterlab') }}" class="btn btn-danger btn-lg">Stop Jupyterlab</a>
+      {% else %}
+      <label for="jupyterlabmemory" class="form-label">Use <span id="selectedjupyterlabmemory">20</span> GB Memory</label>
+      <input type="range" class="form-range" id="jupyterlabmemory" min="10" max="80" step="1" value="20">
+      {% endif %}
+    </div>
+  </div>
+
+
 
 </div>
 

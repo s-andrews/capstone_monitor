@@ -7,6 +7,15 @@ $( document ).ready(function() {
             $("#selectedrstudiomemory").text($("#rstudiomemory").val())
         }
     )
+
+    $("#startjupyterlab").click(start_jupyterlab)
+    $("#stopjupyterlab").click(stop_jupyterlab)
+    $("#jupyterlabmemory").on(
+        "input",
+        function(x) {
+            $("#selectedjupyterlabmemory").text($("#jupyterlabmemory").val())
+        }
+    )
 })
 
 
@@ -46,3 +55,40 @@ function start_rstudio() {
 
 
 }
+
+
+function stop_jupyterlab() {
+
+    console.log("Stopping Jupyterlab")
+    $("#stopjupyterlab").prop("disabled",true)
+
+    $("#stopjupyterlab").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...`
+    );
+
+}
+
+function start_jupyterlab() {
+
+    $("#startjupyterlab").prop("disabled",true)
+
+    $("#startjupyterlab").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...`
+    );
+
+    let memory = $("#jupyterlabmemory").val()
+
+    console.log("Launching jupyterlab")
+    $.ajax(
+        {
+            url: "/launch_program/jupyterlab/"+memory,
+            method: "GET",
+            success: function() {
+                location.reload()
+            },
+            error: function(message) {
+            }
+        }
+    )
+}
+
