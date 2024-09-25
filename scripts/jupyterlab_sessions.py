@@ -84,7 +84,9 @@ def create_alias(user,server,port,jobid,random_id,token):
                 line = line.strip()
                 if line.startswith("#") and line[1:].split()[0] == user:
                     # We have an old entry for this user we need to remove
-                    # We need to get rid of the next four lines as well
+                    # We need to get rid of the next six lines as well
+                    infh.readline()
+                    infh.readline()
                     infh.readline()
                     infh.readline()
                     infh.readline()
@@ -96,10 +98,12 @@ def create_alias(user,server,port,jobid,random_id,token):
         
         # Add the new server
         print(f"#{user} {server} {port} {jobid} {token}", file=out)
+        print(f"ProxyPass /jupyterlab/{random_id}/api/kernels/ ws://{server}:{port}/jupyterlab/{random_id}/api/kernels/", file=out)
+        print(f"ProxyPassReverse /jupyterlab/{random_id}/api/kernels/ ws://{server}:{port}/jupyterlab/{random_id}/api/kernels/", file=out)
+        print(f"ProxyPass /jupyterlab/{random_id}/api/events/ ws://{server}:{port}/jupyterlab/{random_id}/api/events/", file=out)
+        print(f"ProxyPassReverse /jupyterlab/{random_id}/api/events/ ws://{server}:{port}/jupyterlab/{random_id}/api/events/", file=out)
         print(f"ProxyPass /jupyterlab/{random_id}/ http://{server}:{port}/jupyterlab/{random_id}/", file=out)
         print(f"ProxyPassReverse /jupyterlab/{random_id}/ http://{server}:{port}/jupyterlab/{random_id}/", file=out)
-        print(f"ProxyPass /jupyterlab/{random_id}/ ws://{server}:{port}/jupyterlab/{random_id}/", file=out)
-        print(f"ProxyPassReverse /jupyterlab/{random_id}/ ws://{server}:{port}/jupyterlab/{random_id}/", file=out)
                 
 
     # Now we can copy the new version of the file over the top of the old
@@ -130,8 +134,7 @@ def create_server(user,mem,port):
     # Make a random hex string token
     token = secrets.token_hex(32)
     
-
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jjuypterserv -p interactive --wrap=\"module load jupyterlab; jupyter lab --no-browser --ip=0.0.0.0 --port={port} --ServerApp.base_url=jupyterlab/{random_id} --ServerApp.token={token}\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/bi/home/andrewss/jl.log -e/bi/home/andrewss/jl.err -Jjuypterserv -p interactive --wrap=\"module load jupyterlab; jupyter lab --debug --no-browser --ip=0.0.0.0 --port={port} --ServerApp.base_url=jupyterlab/{random_id} --ServerApp.token={token}\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
@@ -160,8 +163,6 @@ def check_existing_server(user):
                     job = sections[3]
                     token = sections[4]
 
-                    # TODO: We need to get the token for this server too
-                    # 
                     # We need to see if this job is still running
                     # We can run squeue, and we'll either get an error
                     # because it doesn't recognise the ID, or we'll get
@@ -169,6 +170,9 @@ def check_existing_server(user):
                     proc = subprocess.run(["squeue","-j",job], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE, encoding="utf8")
                 
                     if proc.returncode == 0 and "compute" in proc.stdout:
+                        # Skip the 4 web socket lines
+                        for _ in range(4):
+                            infh.readline()
                         url = infh.readline().split()[1]
                         return (job,"https://capstone.babraham.ac.uk"+url+"lab?token="+token)
                     
