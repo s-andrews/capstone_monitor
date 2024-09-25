@@ -134,7 +134,7 @@ def create_server(user,mem,port):
     # Make a random hex string token
     token = secrets.token_hex(32)
     
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/bi/home/andrewss/jl.log -e/bi/home/andrewss/jl.err -Jjuypterserv -p interactive --wrap=\"module load jupyterlab; jupyter lab --debug --no-browser --ip=0.0.0.0 --port={port} --ServerApp.base_url=jupyterlab/{random_id} --ServerApp.token={token}\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jjuypterserv -p interactive --wrap=\"module load jupyterlab; jupyter lab --no-browser --ip=0.0.0.0 --port={port} --ServerApp.base_url=jupyterlab/{random_id} --ServerApp.token={token}\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
