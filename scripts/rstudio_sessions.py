@@ -134,7 +134,7 @@ def create_server(user,mem,port):
         with open(conf_file,"wt", encoding="utf8") as out:
             print(f"directory=/bi/home/{user}/rstudio-server", file=out)
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir /tmp/rstudio-server/{user} --server-pid-file /tmp/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir /bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
