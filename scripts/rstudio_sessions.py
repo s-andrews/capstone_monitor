@@ -105,6 +105,7 @@ def create_alias(user,server,port,jobid):
     # Now we can copy the new version of the file over the top of the old
     # version and restart the http server so the new alias is picked up.
     os.rename("/etc/httpd/conf.d/rstudio-server.conf.new","/etc/httpd/conf.d/rstudio-server.conf")
+    os.chmod("/etc/httpd/conf.d/rstudio-server.conf",0o600)
     subprocess.run(["systemctl","reload","httpd"])
 
     # So it seems that the reload doesn't happen immediately but that there is a slight
