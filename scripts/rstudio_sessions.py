@@ -84,7 +84,7 @@ def create_alias(user,server,port,jobid,random_id):
                     # We have an old entry for this user we need to remove
                     # We need to get rid of the next three lines as well
                     infh.readline()
-                    infh.readline()
+                    #infh.readline()
                     #infh.readline()
 
                 else:
@@ -94,7 +94,7 @@ def create_alias(user,server,port,jobid,random_id):
         # Add the new server
         print(f"#{user} {server} {port} {jobid}", file=out)
         print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/", file=out)
-        print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
+        #print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
         #print(f"ProxyPassReverse /rstudio/{random_id}/ https://{server}:{port}/", file=out)
                 
 
@@ -136,7 +136,7 @@ def create_server(user,mem,port):
         random_id += random.choice(string.ascii_uppercase)
 
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/bi/home/andrewss/rs.log -e/bi/home/andrewss/rs.err -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/bi/home/andrewss/rs.log -e/bi/home/andrewss/rs.err -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
