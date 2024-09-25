@@ -51,8 +51,8 @@ def action_start(options):
 
     else:
         port = find_free_port()
-        jobid,server = create_server(options.user, options.mem, port)
-        url = create_alias(options.user,server,port,jobid)
+        jobid,server,random_id = create_server(options.user, options.mem, port)
+        url = create_alias(options.user,server,port,jobid,random_id)
 
         print(url)
 
@@ -72,7 +72,7 @@ def find_free_port():
 
     return random_port
 
-def create_alias(user,server,port,jobid):
+def create_alias(user,server,port,jobid,random_id):
     # We need to rewrite the /etc/httpd/conf.d/rstudio-server.conf file to add the details
     # of this new server.
     with open("/etc/httpd/conf.d/rstudio-server.conf.new","wt",encoding="utf8") as out:
@@ -85,21 +85,17 @@ def create_alias(user,server,port,jobid):
                     # We need to get rid of the next three lines as well
                     infh.readline()
                     infh.readline()
-                    infh.readline()
+                    #infh.readline()
 
                 else:
                     print(line, file=out)
 
-        # Make a random id
-        random_id = ""
-        for _ in range(20):
-            random_id += random.choice(string.ascii_uppercase)
         
         # Add the new server
         print(f"#{user} {server} {port} {jobid}", file=out)
         print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/", file=out)
         print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
-        print(f"ProxyPassReverse /rstudio/{random_id}/ https://{server}:{port}/", file=out)
+        #print(f"ProxyPassReverse /rstudio/{random_id}/ https://{server}:{port}/", file=out)
                 
 
     # Now we can copy the new version of the file over the top of the old
@@ -134,7 +130,13 @@ def create_server(user,mem,port):
         with open(conf_file,"wt", encoding="utf8") as out:
             print(f"directory=/bi/home/{user}/rstudio-server", file=out)
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir /bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
+    # Make a random id
+    random_id = ""
+    for _ in range(20):
+        random_id += random.choice(string.ascii_uppercase)
+
+
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/bi/home/andrewss/rs.log -e/bi/home/andrewss/rs.err -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
@@ -147,7 +149,7 @@ def create_server(user,mem,port):
         queue_output = subprocess.check_output(f"squeue -j {job_id}", shell=True, encoding="utf8")
         node = queue_output.strip().split("\n")[-1].split()[-1]
         if node.startswith("compute"):
-            return (job_id,node)
+            return (job_id,node,random_id)
 
 def check_existing_server(user):
     # We read through the current conf file to see if we find this user.
