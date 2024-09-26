@@ -9,7 +9,7 @@
       <img width="100%" src="{{ url_for('static', filename='images/programs/rstudio.png') }}">
     </div>
     <div class="col-md-3 my-auto text-center">
-      <h2 id="rstudio_state">{% if rstudio_running %}Rstudio is running{% else %}Rstudio inactive{% endif %}</h2>
+      <h2 id="rstudio_state">{% if rstudio_running %}Running{% else %}Inactive{% endif %}</h2>
     </div>
     <div class="col-md-3 my-auto">
       {% if rstudio_running %}
@@ -29,11 +29,11 @@
   </div>
 
   <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-3 my-auto">
       <img width="100%" src="{{ url_for('static', filename='images/programs/jupyterlab.svg') }}">
     </div>
     <div class="col-md-3 my-auto text-center">
-      <h2 id="jupyterlab_state">{% if jupyterlab_running %}Jupyterlab is running{% else %}Jupyterlab inactive{% endif %}</h2>
+      <h2 id="jupyterlab_state">{% if jupyterlab_running %}Running{% else %}Inactive{% endif %}</h2>
     </div>
     <div class="col-md-3 my-auto">
       {% if jupyterlab_running %}
@@ -58,7 +58,7 @@
       <img width="100%" src="{{ url_for('static', filename='images/programs/filebrowser.svg') }}">
     </div>
     <div class="col-md-3 my-auto text-center">
-      <h2 id="jupyterlab_state">{% if filebrowser_running %}Filebrowser is running{% else %}Filebrowser inactive{% endif %}</h2>
+      <h2 id="jupyterlab_state">{% if filebrowser_running %}Running{% else %}Inactive{% endif %}</h2>
     </div>
     <div class="col-md-3 my-auto">
       {% if filebrowser_running %}
