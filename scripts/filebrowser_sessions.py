@@ -137,7 +137,7 @@ def create_server(user,share,port):
         root_directory = f"/bi/group/{groupname}"
 
 
-    command = f"sudo -i -u {user} sbatch --mem=2G -o/dev/null -e/dev/null -Jfilebrowser -p interactive --wrap=\"cd {root_directory}; /bi/apps/filebrowser/filebrowser --disable-exec --username {user} --address=0.0.0.0 --port={port} --baseurl /filebrowser/{random_id} -d /bi/home/{user}/filebrowser.db\""
+    command = f"sudo -i -u {user} sbatch --mem=2G -o/dev/null -e/dev/null -Jfilebrowser -p interactive --wrap=\"cd {root_directory}; /bi/apps/filebrowser/filebrowser --disable-exec --noauth --username {user} --address=0.0.0.0 --port={port} --baseurl /filebrowser/{random_id} -d /bi/home/{user}/filebrowser.db\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
