@@ -53,6 +53,35 @@
   </div>
 
 
+  <div class="row">
+    <div class="col-md-3 my-auto">
+      <img width="100%" src="{{ url_for('static', filename='images/programs/filebrowser.svg') }}">
+    </div>
+    <div class="col-md-3 my-auto text-center">
+      <h2 id="jupyterlab_state">{% if filebrowser_running %}Filebrowser is running{% else %}Filebrowser inactive{% endif %}</h2>
+    </div>
+    <div class="col-md-3 my-auto">
+      {% if filebrowser_running %}
+      <a href="{{ url_for('launch_program', program='filebrowser') }}" target="_filebrowser" class="btn btn-primary btn-lg">Open Filebrowser</a>
+      {% else %}
+      <button id="startfilebrowser" class="btn btn-primary btn-lg">Start Filebrowser</a>
+      {% endif %}
+    </div>
+      <div class="col-md-3 my-auto">
+      {% if filebrowser_running %}
+      <a id="stopfilebrowser" href="{{ url_for('stop_program', program='filebrowser') }}" class="btn btn-danger btn-lg">Stop Filebrowser</a>
+      {% else %}
+      <label for="filebrowsershare" class="form-label">Browse which folder</label>
+      <select id="filebrowsershare" class="form-select" aria-label="Browse which folder">
+        <option selected>home</option>
+        <option>group</option>
+        <option>scratch</option>
+      </select>
+      {% endif %}
+    </div>
+  </div>
+
+
 
 </div>
 

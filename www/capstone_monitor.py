@@ -598,6 +598,25 @@ def launch_program(program,memory):
         else:
             raise Exception("Couldn't launch jupyterlab session")
 
+    elif program == "filebrowser":
+
+        # Find out if filebrowser is running.  If it's running already we get the URL
+        # and then redirect to it.  If it's not then we just print the URL
+
+        # For filebrowser the mem setting is actually the share.
+
+        filebrowser_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/filebrowser_sessions.py", person["username"],"list"], encoding="utf8")
+
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/filebrowser_sessions.py","--share",str(memory),person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            if filebrowser_running:
+                return redirect(proc.stdout.strip())
+            else:
+                return proc.stdout.strip()
+        else:
+            raise Exception("Couldn't launch filebrowser session")
+
+
 
     raise Exception("Don't know program "+program)
 
@@ -628,6 +647,17 @@ def stop_program(program):
         else:
             raise Exception("Couldn't stop jupyterlab session")
 
+
+    elif program == "filebrowser":
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/filebrowser_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            time.sleep(5)
+            return redirect(url_for("programs"))
+        else:
+            raise Exception("Couldn't stop filebrowser session")
+
+
+
     raise Exception("Don't know program "+program)
 
 
@@ -647,12 +677,15 @@ def programs():
     # Find out if jupyterlab is running.
     jupyterlab_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py", person["username"],"list"], encoding="utf8")
 
+    # Find out if filebrowser is running.
+    filebrowser_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/filebrowser_sessions.py", person["username"],"list"], encoding="utf8")
 
     return(render_template(
         "programs.html",
         name=person["name"],
         rstudio_running = rstudio_running,
         jupyterlab_running=jupyterlab_running,
+        filebrowser_running=filebrowser_running,
         isadmin=is_admin(person)
 
     ))

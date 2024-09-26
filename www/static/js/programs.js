@@ -16,6 +16,10 @@ $( document ).ready(function() {
             $("#selectedjupyterlabmemory").text($("#jupyterlabmemory").val())
         }
     )
+
+    $("#startfilebrowser").click(start_filebrowser)
+    $("#stopfilebrowser").click(stop_filebrowser)
+
 })
 
 
@@ -92,3 +96,37 @@ function start_jupyterlab() {
     )
 }
 
+function stop_filebrowser() {
+
+    console.log("Stopping Filebrowser")
+    $("#stopfilebrowser").prop("disabled",true)
+
+    $("#stopfilebrowser").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...`
+    );
+
+}
+
+function start_filebrowser() {
+
+    $("#startfilebrowser").prop("disabled",true)
+
+    $("#startfilebrowser").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...`
+    );
+
+    let share = $("#filebrowsershare").val()
+
+    console.log("Launching filebrowser")
+    $.ajax(
+        {
+            url: "/launch_program/filebrowser/"+share,
+            method: "GET",
+            success: function() {
+                location.reload()
+            },
+            error: function(message) {
+            }
+        }
+    )
+}

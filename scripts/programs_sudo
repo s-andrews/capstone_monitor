@@ -1,2 +1,3 @@
 andrewss ALL=(root) NOPASSWD: /bi/home/andrewss/capstone_monitor/scripts/rstudio_sessions.py
 andrewss ALL=(root) NOPASSWD: /bi/home/andrewss/capstone_monitor/scripts/jupyterlab_sessions.py
+andrewss ALL=(root) NOPASSWD: /bi/home/andrewss/capstone_monitor/scripts/filebrowser_sessions.py
