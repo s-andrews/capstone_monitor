@@ -45,6 +45,7 @@ def index():
 
     # Are any nodes in trouble?
     good_status = ["idle","mix","alloc","comp"]
+    bad_nodes = []
     with subprocess.Popen(["sinfo","-N"], stdout=subprocess.PIPE, encoding="utf8") as sinfo_proc:
         sinfo_proc.stdout.readline() # Throw away header
 
@@ -54,6 +55,7 @@ def index():
             if "*" in sections[-1]:
                 # It's not communicating
                 alerts.append(f"Node {sections[0]} is not communicating")
+                bad_nodes.append(sections[0])
                 continue
 
             if not sections[-1] in good_status:
@@ -97,8 +99,14 @@ def index():
         if "compute-0-" in line:
             is_batch = True
 
+        if line.startswith("NodeName="):
+            thisNode = line[9:].split()[0]
+            if thisNode in bad_nodes:
+                # We don't count stats from broken nodes
+                continue
 
-        if line.startswith("CPUAlloc"):
+            # Get the CPUAlloc line which should be next
+            line = scontrol.stdout.readline()
             sections = line.split()
             for section in sections:
                 subsections = section.split("=")
@@ -112,32 +120,48 @@ def index():
                         node_data["used_cpus"] += int(subsections[1])
                     else:
                         node_data["interactive_used_cpus"] += int(subsections[1])
+            
+            for line in scontrol.stdout:
+                line=line.strip()
 
-        if line.startswith("RealMemory"):
-            sections = line.split()
-            for section in sections:
-                subsections = section.split("=")
-                if subsections[0]=="RealMemory":
-                    if is_batch:
-                        node_data["total_memory"] += int(subsections[1])
-                    else:
-                        node_data["interactive_total_memory"] += int(subsections[1])
-                elif subsections[0]=="AllocMem":
-                    if is_batch:
-                        node_data["used_memory"] += int(subsections[1])
-                    else:
-                        node_data["interactive_used_memory"] += int(subsections[1])
+                if line.startswith("RealMemory"):
+                    sections = line.split()
+                    for section in sections:
+                        subsections = section.split("=")
+                        if subsections[0]=="RealMemory":
+                            if is_batch:
+                                node_data["total_memory"] += int(subsections[1])
+                            else:
+                                node_data["interactive_total_memory"] += int(subsections[1])
+                        elif subsections[0]=="AllocMem":
+                            if is_batch:
+                                node_data["used_memory"] += int(subsections[1])
+                            else:
+                                node_data["interactive_used_memory"] += int(subsections[1])
+                    break
 
+
+    storageshares = []
+    storagesizes = []
+    storagecolours = []
 
     df = subprocess.Popen(["df","-BT"], stdout=subprocess.PIPE, encoding="utf8")
 
     for line in df.stdout:
         line = line.strip()
-        if line.startswith("Private-Cluster.local:/ifs/homes"):
-            sections = line.split()
-            node_data["total_storage"] = int(sections[1][:-1])
-            node_data["used_storage"] = int(sections[2][:-1])
+        sections = line.split()
 
+        # The NFS shares all have a colon in them
+        if ":" in sections[0] and not "snapshot" in sections[0]:
+            storageshares.append(sections[-1].split("/")[-1])
+            storagesizes.append(sections[-2][:-1])
+            thissize = int(sections[-2][:-1])
+            if thissize >=85:
+                storagecolours.append("#CC0000")
+            elif thissize >=75:
+                storagecolours.append("#DDA500")
+            else:
+                storagecolours.append("#00AA00")
 
 
     # We need the details of the current jobs in the queue
@@ -202,6 +226,9 @@ def index():
     return render_template(
         "index.html",
         node_data=node_data, 
+        storageshares=str(storageshares),
+        storagesizes=str(storagesizes),
+        storagecolours=str(storagecolours),
         userjobs=job_data,
         alerts=alerts, 
         name=person["name"],
