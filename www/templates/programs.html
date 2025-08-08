@@ -58,7 +58,7 @@
       <img width="100%" src="{{ url_for('static', filename='images/programs/filebrowser.svg') }}">
     </div>
     <div class="col-md-2 my-auto text-center">
-      <h2 id="jupyterlab_state">{% if filebrowser_running %}Running{% else %}Inactive{% endif %}</h2>
+      <h2 id="filebrowser_state">{% if filebrowser_running %}Running{% else %}Inactive{% endif %}</h2>
     </div>
     <div class="col-md-3 my-auto">
       {% if filebrowser_running %}
@@ -81,7 +81,29 @@
     </div>
   </div>
 
-
+  <div class="row mb-5">
+    <div class="col-md-4 my-auto">
+      <img width="100%" src="{{ url_for('static', filename='images/programs/ollama.svg') }}">
+    </div>
+    <div class="col-md-2 my-auto text-center">
+      <h2 id="ollama_state">{% if ollama_running %}Running{% else %}Inactive{% endif %}</h2>
+    </div>
+    <div class="col-md-3 my-auto">
+      {% if ollama_running %}
+      <button id="copyollamaurl" class="btn btn-primary btn-lg" onClick="(function(){
+    navigator.clipboard.writeText('{{ ollama_url }}');
+    return false;
+})();return false;">Copy Ollama URL</button>
+      {% else %}
+      <button id="startollama" class="btn btn-primary btn-lg">Start Ollama</a>
+      {% endif %}
+    </div>
+      <div class="col-md-3 my-auto">
+      {% if ollama_running %}
+      <a id="stopollama" href="{{ url_for('stop_program', program='ollama') }}" class="btn btn-danger btn-lg">Stop Ollama</a>
+      {% endif %}
+    </div>
+  </div>
 
 </div>
 

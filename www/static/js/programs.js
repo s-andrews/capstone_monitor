@@ -20,6 +20,9 @@ $( document ).ready(function() {
     $("#startfilebrowser").click(start_filebrowser)
     $("#stopfilebrowser").click(stop_filebrowser)
 
+    $("#startollama").click(start_ollama)
+    $("#stopollama").click(stop_ollama)
+
 })
 
 
@@ -130,3 +133,38 @@ function start_filebrowser() {
         }
     )
 }
+
+
+function stop_ollama() {
+
+    console.log("Stopping Ollama")
+    $("#stopollama").prop("disabled",true)
+
+    $("#stopollama").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...`
+    );
+
+}
+
+function start_ollama() {
+
+    $("#startollama").prop("disabled",true)
+
+    $("#startollama").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...`
+    );
+
+    console.log("Launching ollama")
+    $.ajax(
+        {
+            url: "/launch_program/ollama",
+            method: "GET",
+            success: function() {
+                location.reload()
+            },
+            error: function(message) {
+            }
+        }
+    )
+}
+
