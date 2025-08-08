@@ -125,7 +125,14 @@ def create_server(user,port):
     for _ in range(20):
         random_id += random.choice(string.ascii_uppercase)
 
-    launch_script_location = str(Path(__file__).parent / "start_ollama_on_compute.sh")
+    # This was such a good idea, but didn't work.  I've got a wrapper script which finds
+    # the ip of the host it's running on and starts ollama with that as the URL, but it
+    # runs as the launching user so they can't see the folder of scripts for the monitor
+    # I've therefore had to hard code the address in /bi/apps which will do the module
+    # load and then start the model
+
+    #launch_script_location = str(Path(__file__).parent / "start_ollama_on_compute.sh")
+    launch_script_location = "/bi/apps/ollama/start_ollama_on_compute.sh"
 
     command = f"sudo -i -u {user} sbatch --mem={20}G -o/dev/null -e/dev/null -Jollamaserv --nodelist compute-0-1 --wrap=\"{launch_script_location} {port}\""
 
