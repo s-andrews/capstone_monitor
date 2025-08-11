@@ -134,7 +134,7 @@ def create_server(user,port):
     #launch_script_location = str(Path(__file__).parent / "start_ollama_on_compute.sh")
     launch_script_location = "/bi/apps/ollama/start_ollama_on_compute.sh"
 
-    command = f"sudo -i -u {user} sbatch --mem={20}G -o/dev/null -e/dev/null -Jollamaserv --nodelist compute-0-1 --wrap=\"{launch_script_location} {port}\""
+    command = f"sudo -i -u {user} sbatch --time=8:00:00 --mem={20}G -o/dev/null -e/dev/null -Jollamaserv --nodelist compute-0-1 --wrap=\"{launch_script_location} {port}\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
