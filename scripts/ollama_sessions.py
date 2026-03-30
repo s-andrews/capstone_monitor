@@ -27,32 +27,25 @@ def main():
 
 
 def action_list(options):
-    check_answer = check_existing_server(options.user)
+    check_answer = check_existing_server()
     if check_answer is None:
         return None
     return check_answer[0]
-
-def action_stop(options):
-    check_answer = check_existing_server(options.user)
-    if check_answer is None:
-        return
-
-    subprocess.run(["scancel",check_answer[0]])
 
 
 def action_start(options):
 
     # We're starting a new server, but only if there isn't one running already.
 
-    check_answer = check_existing_server(options.user)
+    check_answer = check_existing_server()
 
     if check_answer is not None:
         print(check_answer[1])
 
     else:
         port = find_free_port()
-        jobid,server,random_id = create_server(options.user, port)
-        url = create_alias(options.user,server,port,jobid,random_id)
+        jobid,server,random_id = create_server(port)
+        url = create_alias(server,port,jobid,random_id)
 
         print(url)
 
@@ -72,9 +65,13 @@ def find_free_port():
 
     return random_port
 
-def create_alias(user,server,port,jobid,random_id):
+def create_alias(server,port,jobid,random_id):
     # We need to rewrite the /etc/httpd/conf.d/ollama-server.conf file to add the details
     # of this new server.
+
+    # We have a dedicated user for this job.
+    user = "ollama"
+
     with open("/etc/httpd/conf.d/ollama-server.conf.new","wt",encoding="utf8") as out:
         with open("/etc/httpd/conf.d/ollama-server.conf","rt", encoding="utf8") as infh:
 
@@ -114,11 +111,18 @@ def create_alias(user,server,port,jobid,random_id):
     # to complete before we send people to the new url
     time.sleep(5)
     
+    # We can make this work over https in some instances but hardly ever. All of the ollama
+    # libraries use their own internal certificate stores which are not compatible with our
+    # BICS signed certificates.  I can't make continue use https as there's a bug in the 
+    # implementation of the ssl verification bypass.  For all of these reasons I'm punting this
+    # back to plain http.
+    return(f"http://capstone.babraham.ac.uk/ollama/{random_id}/")
 
-    return(f"https://capstone.babraham.ac.uk/ollama/{random_id}/")
 
+def create_server(port):
 
-def create_server(user,port):
+    # We're going to make this run under the "ollama" user
+    user = "ollama"
 
     # Make a random id
     random_id = ""
@@ -130,11 +134,18 @@ def create_server(user,port):
     # runs as the launching user so they can't see the folder of scripts for the monitor
     # I've therefore had to hard code the address in /bi/apps which will do the module
     # load and then start the model
+        
+    # I'm changing the way this works.  Because we can have a shared ollama instance, and
+    # because ollama doesn't do anything as the user its running as, I'm going to set it
+    # up so there is a single instance of the server, and that it runs as me. Anyone can
+    # restart it if it's not running already.
+        
+    # I'll also remove the time constraint so anyone can run it all the time.
 
     #launch_script_location = str(Path(__file__).parent / "start_ollama_on_compute.sh")
     launch_script_location = "/bi/apps/ollama/start_ollama_on_compute.sh"
 
-    command = f"sudo -i -u {user} sbatch --time=8:00:00 --mem={20}G -o/dev/null -e/dev/null -Jollamaserv --nodelist compute-0-1 --wrap=\"{launch_script_location} {port}\""
+    command = f"sudo -i -u {user} sbatch --mem={20}G -o/dev/null -e/dev/null -Jollamaserv --nodelist compute-0-1 --wrap=\"{launch_script_location} {port}\""
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
@@ -149,11 +160,16 @@ def create_server(user,port):
         if node.startswith("compute"):
             return (job_id,node,random_id)
 
-def check_existing_server(user):
+def check_existing_server():
     # We read through the current conf file to see if we find this user.
     # If they're in there then we check to see if the job which started
     # their server is still running and if it is we just need to redirect
     # them back to that.
+
+    # With the new setup we're always going to run this as the "ollama"
+    # user, so that's the only one we need to check.
+
+    user = "ollama"
 
     with open("/etc/httpd/conf.d/ollama-server.conf","rt", encoding="utf8") as infh:
         for line in infh:
@@ -176,8 +192,7 @@ def check_existing_server(user):
 
 def get_options():
     parser = argparse.ArgumentParser("Launch ollama server sessions")
-    parser.add_argument("user",type=str, help="Username under which to launch")
-    parser.add_argument("action",type=str,help="Action to perform [start / stop / list]")
+    parser.add_argument("action",type=str,help="Action to perform [start / list]")
 
     options = parser.parse_args()
 

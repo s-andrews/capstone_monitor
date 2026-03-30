@@ -11,6 +11,12 @@ PORT=${args[0]}
 
 export OLLAMA_HOST="${THIS_IP}:${PORT}"
 
+export OLLAMA_MAX_QUEUE=30
+
+export OLLAMA_NUM_PARALLEL=2
+
+export OLLAMA_KEEP_ALIVE=1h
+
 export OLLAMA_MODELS=/bi/apps/ollama/models
 
 echo $OLLAMA_HOST

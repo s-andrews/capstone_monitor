@@ -652,7 +652,7 @@ def launch_program(program,memory):
 
         ollama_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py", person["username"],"list"], encoding="utf8")
 
-        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py",person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py","start"],stdout=subprocess.PIPE, encoding="utf8")
         if proc.returncode == 0:
             if ollama_running:
                 return redirect(proc.stdout.strip())
@@ -701,14 +701,6 @@ def stop_program(program):
             raise Exception("Couldn't stop filebrowser session")
 
 
-    elif program == "ollama":
-        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
-        if proc.returncode == 0:
-            time.sleep(5)
-            return redirect(url_for("programs"))
-        else:
-            raise Exception("Couldn't stop ollama session")
-
     raise Exception("Don't know program "+program)
 
 
@@ -732,12 +724,12 @@ def programs():
     filebrowser_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/filebrowser_sessions.py", person["username"],"list"], encoding="utf8")
 
     # Find out if ollama is running.
-    ollama_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py", person["username"],"list"], encoding="utf8")
+    ollama_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py","list"], encoding="utf8")
 
     # If it is running then get the ollama URL so we can embed it in the page.
     ollama_url = ""
     if ollama_running:
-        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py",person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py","start"],stdout=subprocess.PIPE, encoding="utf8")
         if proc.returncode == 0:
             ollama_url = proc.stdout.strip()
 

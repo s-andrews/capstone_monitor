@@ -98,10 +98,7 @@
       <button id="startollama" class="btn btn-primary btn-lg">Start Ollama</a>
       {% endif %}
     </div>
-      <div class="col-md-3 my-auto">
-      {% if ollama_running %}
-      <a id="stopollama" href="{{ url_for('stop_program', program='ollama') }}" class="btn btn-danger btn-lg">Stop Ollama</a>
-      {% endif %}
+    <div class="col-md-3 my-auto">
     </div>
   </div>
 
