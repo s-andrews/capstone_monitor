@@ -41,7 +41,7 @@ def index():
 
         if load_average > 10:
             biggest_user, biggest_cpu = get_biggest_user()
-            alerts.append(f"High load average ({round(load_average,1)}) on head node. Highest user is {biggest_user} at {biggest_cpu}% CPU")
+            alerts.append(f"High load average ({round(load_average,1)}) on head node. Highest user is {biggest_user} at {round(biggest_cpu,1)}% CPU")
 
     # Are any nodes in trouble?
     good_status = ["idle","mix","alloc","comp"]
