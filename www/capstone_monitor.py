@@ -1248,8 +1248,13 @@ def process_login():
     try:    
         conn.simple_bind_s(username+"@"+server_conf["server"]["ldap"], password)
 
+        # It worked so we can clean some things up
+
         # Clear any IP recorded login fails
         ips.delete_one({"ip":request.remote_addr})
+
+        # Clear any previous failed logins for this username
+        people.update_one({"username":username},{"$set":{"failed_logins":[]}})
 
         sessioncode = generate_id(20)
 
