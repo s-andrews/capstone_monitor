@@ -12,6 +12,8 @@ import random
 import os
 from pathlib import Path
 import time
+import pwd
+import stat
 
 def main():
     options = get_options()
@@ -130,13 +132,44 @@ def create_server(user,mem,port):
         with open(conf_file,"wt", encoding="utf8") as out:
             print(f"directory=/bi/home/{user}/rstudio-server", file=out)
 
+
+    # We need a secure cookie file in .rstudio-server if there isn't one.
+    base_dir = Path(f"/bi/home/{user}")
+    rstudio_dir = base_dir / ".rstudio-server"
+    secure_cookie_key = rstudio_dir / "secure-cookie-key"
+
+    # Create /bi/home/{user}/.rstudio-server if it does not exist
+    rstudio_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create secure-cookie-key with uuidgen output if it does not exist
+    if not secure_cookie_key.exists():
+        uuid_value = subprocess.check_output(["uuidgen"], text=True).strip()
+        secure_cookie_key.write_text(uuid_value + "\n")
+
+    # Look up the user's UID and primary GID
+    user_info = pwd.getpwnam(user)
+    uid = user_info.pw_uid
+    gid = user_info.pw_gid
+
+    # Change ownership to {user}
+    os.chown(rstudio_dir, uid, gid)
+    os.chown(secure_cookie_key, uid, gid)
+
+    # Set permissions to 600
+    secure_cookie_key.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
     # Make a random id
     random_id = ""
     for _ in range(20):
         random_id += random.choice(string.ascii_uppercase)
 
 
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --www-verify-user-agent=0 --auth-validate-users=0\""
+# This was the old command from a previous version of rstudio server and R
+#   command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --secure-cookie-key-file=/bi/home/{user}/.rstudio-server/secure-cookie-key --www-verify-user-agent=0 --auth-validate-users=0\""
+
+# We're now using R 4.6 and the 2026-04 Rstudio server
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.6.1/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --secure-cookie-key-file=/bi/home/{user}/.rstudio-server/secure-cookie-key --www-verify-user-agent=0 --auth-validate-users=0\""
+
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
 
