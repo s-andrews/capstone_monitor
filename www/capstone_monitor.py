@@ -650,7 +650,7 @@ def launch_program(program,memory):
 
         # For filebrowser the mem setting is actually the share.
 
-        ollama_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py", person["username"],"list"], encoding="utf8")
+        ollama_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py", "list"], encoding="utf8")
 
         proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/ollama_sessions.py","start"],stdout=subprocess.PIPE, encoding="utf8")
         if proc.returncode == 0:
