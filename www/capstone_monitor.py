@@ -513,12 +513,21 @@ def allstorage(date):
 
 
 def is_admin(person):
+
     if person["username"] in server_conf["group_leaders"]:
         # They are a group leader
         return True
 
+
     # All members of bics or bioinformatics are also admins
     groups = subprocess.run(["groups",person["username"]], capture_output=True, encoding="utf8")
+
+
+    # This could be a person who is no longer here 
+    # so the account might be dead
+    if groups.returncode != 0:
+        return False
+
     _,groups = groups.stdout.split(":")
     groups = groups.split()
     return "bioinf" in groups or "bics" in groups
