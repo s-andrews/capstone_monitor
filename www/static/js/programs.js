@@ -8,6 +8,16 @@ $( document ).ready(function() {
         }
     )
 
+    $("#startvscode").click(start_vscode)
+    $("#stopvscode").click(stop_vscode)
+    $("#vscodememory").on(
+        "input",
+        function(x) {
+            $("#selectedvscodememory").text($("#vscodememory").val())
+        }
+    )
+
+
     $("#startjupyterlab").click(start_jupyterlab)
     $("#stopjupyterlab").click(stop_jupyterlab)
     $("#jupyterlabmemory").on(
@@ -62,6 +72,44 @@ function start_rstudio() {
 
 
 }
+
+function stop_vscode() {
+
+    console.log("Stopping VSCode")
+    $("#stopvscode").prop("disabled",true)
+
+    $("#stopvscode").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...`
+    );
+
+}
+
+function start_vscode() {
+
+    $("#startvscode").prop("disabled",true)
+
+    $("#startvscode").html(
+        `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Starting...`
+    );
+
+    let memory = $("#vscodememory").val()
+
+    console.log("Launching vscode")
+    $.ajax(
+        {
+            url: "/launch_program/vscode/"+memory,
+            method: "GET",
+            success: function() {
+                location.reload()
+            },
+            error: function(message) {
+            }
+        }
+    )
+
+
+}
+
 
 
 function stop_jupyterlab() {

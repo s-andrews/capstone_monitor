@@ -618,6 +618,21 @@ def launch_program(program,memory):
                 return proc.stdout.strip()
         else:
             raise Exception("Couldn't launch rstudio session")
+        
+    if program == "vscode":
+
+        # Find out if vscode is running.  If it's running already we get the URL
+        # and then redirect to it.  If it's not then we just print the URL
+        vscode_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/vscode_sessions.py", person["username"],"list"], encoding="utf8")
+
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/vscode_sessions.py","--mem",str(memory),person["username"],"start"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            if vscode_running:
+                return redirect(proc.stdout.strip())
+            else:
+                return proc.stdout.strip()
+        else:
+            raise Exception("Couldn't launch vscode session")
 
     elif program == "jupyterlab":
 
@@ -690,7 +705,15 @@ def stop_program(program):
             return redirect(url_for("programs"))
         else:
             raise Exception("Couldn't stop rstudio session")
-        
+
+    elif program == "vscode":
+        proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/vscode_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
+        if proc.returncode == 0:
+            time.sleep(5)
+            return redirect(url_for("programs"))
+        else:
+            raise Exception("Couldn't stop vscode session")
+
 
     elif program == "jupyterlab":
         proc = subprocess.run(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py",person["username"],"stop"],stdout=subprocess.PIPE, encoding="utf8")
@@ -726,6 +749,9 @@ def programs():
     # Find out if rstudio is running.
     rstudio_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/rstudio_sessions.py", person["username"],"list"], encoding="utf8")
 
+    # Find out if vscode is running.
+    vscode_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/vscode_sessions.py", person["username"],"list"], encoding="utf8")
+
     # Find out if jupyterlab is running.
     jupyterlab_running = "None" not in subprocess.check_output(["sudo",Path(__file__).parent.parent / "scripts/jupyterlab_sessions.py", person["username"],"list"], encoding="utf8")
 
@@ -747,6 +773,7 @@ def programs():
         "programs.html",
         name=person["name"],
         rstudio_running = rstudio_running,
+        vscode_running = vscode_running,
         jupyterlab_running=jupyterlab_running,
         filebrowser_running=filebrowser_running,
         ollama_running=ollama_running,

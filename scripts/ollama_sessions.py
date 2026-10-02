@@ -58,9 +58,9 @@ def find_free_port():
                 used_ports.add(int(sections[2]))
 
 
-    random_port = random.randint(20000,40000)
+    random_port = random.randint(40001,41000)
     while random_port in used_ports:
-        random_port = random.randint(20000,40000)
+        random_port = random.randint(40001,41000)
 
 
     return random_port

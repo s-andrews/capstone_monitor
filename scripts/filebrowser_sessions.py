@@ -68,9 +68,9 @@ def find_free_port():
 
     # TODO: Add in ports for rstudio/jupyter
 
-    random_port = random.randint(20000,40000)
+    random_port = random.randint(20000,25000)
     while random_port in used_ports:
-        random_port = random.randint(20000,40000)
+        random_port = random.randint(20000,25000)
 
 
     return random_port

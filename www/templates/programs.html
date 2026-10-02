@@ -30,6 +30,30 @@
 
   <div class="row mb-5">
     <div class="col-md-4 my-auto">
+      <img width="100%" src="{{ url_for('static', filename='images/programs/vscode.svg') }}">
+    </div>
+    <div class="col-md-2 my-auto text-center">
+      <h2 id="jupyterlab_state">{% if vscode_running %}Running{% else %}Inactive{% endif %}</h2>
+    </div>
+    <div class="col-md-3 my-auto">
+      {% if vscode_running %}
+      <a href="{{ url_for('launch_program', program='vscode') }}" target="_vscode" class="btn btn-primary btn-lg">Open VSCode</a>
+      {% else %}
+      <button id="startvscode" class="btn btn-primary btn-lg">Start VSCode</a>
+      {% endif %}
+    </div>
+      <div class="col-md-3 my-auto">
+      {% if vscode_running %}
+      <a id="stopvscode" href="{{ url_for('stop_program', program='vscode') }}" class="btn btn-danger btn-lg">Stop VSCode</a>
+      {% else %}
+      <label for="vscodememory" class="form-label">Use <span id="selectedvscodememory">20</span> GB Memory</label>
+      <input type="range" class="form-range" id="vscodememory" min="10" max="80" step="1" value="20">
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-md-4 my-auto">
       <img width="100%" src="{{ url_for('static', filename='images/programs/jupyterlab.svg') }}">
     </div>
     <div class="col-md-2 my-auto text-center">
