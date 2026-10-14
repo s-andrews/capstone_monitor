@@ -95,7 +95,7 @@ def create_alias(user,server,port,jobid,random_id):
         
         # Add the new server
         print(f"#{user} {server} {port} {jobid}", file=out)
-        print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/", file=out)
+        print(f"ProxyPass /rstudio/{random_id}/ http://{server}:{port}/ upgrade=websocket", file=out)
         #print(f"ProxyPassReverse /rstudio/{random_id}/ http://{server}:{port}/", file=out)
         #print(f"ProxyPassReverse /rstudio/{random_id}/ https://{server}:{port}/", file=out)
                 
@@ -168,7 +168,7 @@ def create_server(user,mem,port):
 #   command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.4.0/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --secure-cookie-key-file=/bi/home/{user}/.rstudio-server/secure-cookie-key --www-verify-user-agent=0 --auth-validate-users=0\""
 
 # We're now using R 4.6 and the 2026-04 Rstudio server
-    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"/usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.6.1/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --secure-cookie-key-file=/bi/home/{user}/.rstudio-server/secure-cookie-key --www-verify-user-agent=0 --auth-validate-users=0\""
+    command = f"sudo -i -u {user} sbatch --mem={mem}G -o/dev/null -e/dev/null -Jrstudioserv -p interactive --wrap=\"module load codex; /usr/lib/rstudio-server/bin/rserver --www-root-path /rstudio/{random_id}/ --server-user={user} --auth-none=1 --server-daemonize=0 --www-port={port} --rsession-which=/bi/apps/R/4.6.1/bin/R --database-config-file=/bi/home/{user}/rstudio_database.conf --server-data-dir=/bi/home/{user}/.rstudio-server --server-pid-file /bi/home/{user}/rstudio-server.pid --secure-cookie-key-file=/bi/home/{user}/.rstudio-server/secure-cookie-key --www-verify-user-agent=0 --auth-validate-users=0\""
 
 
     sbatch_output = subprocess.check_output(command, shell=True, encoding="utf8")
